@@ -51,8 +51,7 @@ app.get("/mice", async (req, res) => {
 
 app.get("/", async (req, res) => {
   try {
-    const allData = await loadKeyboards();
-    allData.push(...(await loadMouses()));
+    const allData = [...(await loadKeyboards()), ...(await loadMouses())];
     res.json(allData);
   } catch (error) {
     res.status(404).json({ detail: "File not found" });
@@ -83,9 +82,7 @@ app.get("/product", async (req, res) => {
         .json({ detail: "No products found for this type" });
     }
 
-    return res
-      .status(400)
-      .json({ detail: "Must provide either slug or product type" });
+    return res.json(allProducts);
   } catch (error) {
     res.status(404).json({ detail: "File not found" });
   }

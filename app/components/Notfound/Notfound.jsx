@@ -6,7 +6,7 @@ export const Notfound = () => {
   return (
     <div className={Styles.mainpage__block} id="content__block">
       <div className={Styles.waves}>
-        <img src="img/main/wave2.svg" alt="" />
+        <img src="/img/main/wave2.svg" alt="" />
       </div>
       <div className={Styles.find__content}>
         <div className={Styles.content__404}>
