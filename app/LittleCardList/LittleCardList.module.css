@@ -1,0 +1,66 @@
+.card__list {
+  text-align: start;
+  user-select: none;
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  height: 100%;
+  max-width: 2000px;
+  gap: 40px;
+  flex-wrap: wrap;
+  scroll-behavior: smooth;
+  color: #274c5b;
+  justify-content: center;
+  margin: auto;
+}
+.card__image {
+  border-radius: 40px;
+}
+.keyboards .card__image {
+  background: url("/img/main/fullsize.png") no-repeat center center;
+  background-color: #c7cdc7;
+  background-size: contain;
+  width: 380px;
+  height: 180px;
+}
+.mouses .card__image {
+  background: url("/img/main/mouses.png") no-repeat center center;
+  background-color: #dedbc8;
+  background-size: contain;
+  width: 380px;
+  height: 180px;
+}
+.switches .card__image {
+  background: url("/img/main/switches.png") no-repeat center center;
+  background-color: #eeebe7;
+  background-size: contain;
+  width: 380px;
+  height: 180px;
+}
+.keycaps .card__image {
+  background: url("/img/main/keycaps.png") no-repeat center center;
+  background-color: #9ac6af;
+  background-size: contain;
+  width: 380px;
+  height: 180px;
+}
+.card__text {
+  padding: 5px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 380px;
+  height: 85px;
+}
+.card__text h4 {
+  font-size: 24px;
+  width: 100%;
+  height: 24px;
+  font-family: Montserrat-SemiBold;
+}
+.card__text p {
+  font-size: 16px;
+  color: #004687;
+  font-weight: 600;
+  font-family: Montserrat;
+}

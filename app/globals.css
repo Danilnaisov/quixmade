@@ -1,38 +1,213 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 * {
-  box-sizing: border-box;
-  padding: 0;
   margin: 0;
-}
+  padding: 0;
+  list-style: none;
+  text-decoration: none;
+  box-sizing: border-box;
 
+  /* text-wrap: nowrap; */
+  /* border: 1px red solid; */
+}
 a {
   color: inherit;
   text-decoration: none;
+}
+header a {
+  text-decoration: none;
+  color: #f9f8f8;
+}
+@font-face {
+  font-family: Montserrat;
+  src: url("fonts/Montserrat.ttf");
+}
+@font-face {
+  font-family: Montserrat-Black;
+  src: url("fonts/MontserratAlternates-Black.ttf");
+}
+@font-face {
+  font-family: Montserrat-Bold;
+  src: url("fonts/MontserratAlternates-Bold.ttf");
+}
+@font-face {
+  font-family: Montserrat-SemiBold;
+  src: url("fonts/MontserratAlternates-SemiBold.ttf");
+}
+li:hover {
+  cursor: pointer;
+}
+html,
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #f9f8f8;
+  font-family: Montserrat;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+  -moz-user-drag: none;
+  -ms-user-drag: none;
+  user-drag: none;
+}
+.waves,
+.flip-waves {
+  width: 100%;
+  height: 100px;
+}
+.waves img {
+  width: 100vw;
+}
+.flip-waves img {
+  width: 100vw;
+}
+.flip-waves {
+  transform: scaleY(-1);
+}
+.wave__header {
+  width: 100%;
+  height: 320px;
+  color: #274c5b;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.wave__header h1 {
+  font-size: 64px;
+  margin-bottom: 120px;
+  font-weight: 800;
+}
+.card__list {
+  text-align: start;
+  user-select: none;
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  height: 600px;
+  gap: 40px;
+  /* flex-wrap: wrap; */
+  scroll-behavior: smooth;
+  color: #274c5b;
+  justify-content: center;
+}
+.card {
+  cursor: pointer;
+  background: #fff;
+  max-width: 400px;
+  max-height: 500px;
+  border-radius: 40px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  gap: 15px;
+  padding: 10px;
+}
+.card:hover {
+  box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+.little__card {
+  cursor: pointer;
+  max-width: 400px;
+  max-height: 310px;
+  border-radius: 40px;
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+}
+.little__card:hover {
+  transform: scale(1.05);
+}
+.card__image {
+  min-width: 380px;
+  min-height: 380px;
+  width: 380px;
+  height: 380px;
+  gap: 15px;
+  padding: 10px;
+}
+.item__c {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+.item__c_block {
+  height: auto;
+  border-radius: 15px;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  width: auto;
+}
+.item__sale {
+  background: #efd372;
+  color: #274c5b;
+}
+.item__wireless {
+  background: #274c5b;
+  color: #f5f5f5;
+}
+.item__notinstock {
+  background: #f5f5f5;
+  color: #274c5b;
+}
+.card__text {
+  padding: 5px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 380px;
+  height: 85px;
+}
+.card__text h4 {
+  font-size: 24px;
+  width: 100%;
+  height: 24px;
+  font-family: Montserrat-Bold;
+}
+.card__text hr {
+  border: 1px solid #bbbbbb;
+  width: 100%;
+}
+.card__text__about {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-content: center;
+  width: 100%;
+  height: 20px;
+}
+.text__left {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+.text__left p,
+span {
+  font-size: 16px;
+  font-weight: 600;
+  height: 50px;
+  font-family: Montserrat;
+  color: #274c5b;
+}
+.text__left span {
+  color: #bbbbbb;
+  text-decoration: line-through;
+}
+.text__right {
+  height: 100%;
+  align-content: center;
 }
 
 @media (prefers-color-scheme: dark) {
