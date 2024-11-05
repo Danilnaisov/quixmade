@@ -5,7 +5,7 @@ import { loadProductBySlug } from "../../../api/api_utils"; // Adjust the path a
 import { Preloader } from "@/app/components/Preloader/Preloader";
 import { Notfound } from "@/app/components/Notfound/Notfound"; // Import your Notfound component
 import { useParams } from "next/navigation"; // Import useParams
-import Styles from "./itempage.module.css"
+import Styles from "./itempage.module.css";
 import PageTemplate from "@/app/components/PageTemplate";
 
 export default function ProductPage() {
@@ -24,10 +24,9 @@ export default function ProductPage() {
     fetchProduct();
   }, [slug]);
   return (
-    <PageTemplate >
+    <PageTemplate>
       {product ? (
         <>
-
           <div className={Styles.item__main__block}>
             <div className={Styles.item__images__block}>
               <img src={product.image} />
@@ -52,7 +51,10 @@ export default function ProductPage() {
               <div className={Styles.language__block}>
                 <h3>Русская</h3>
                 <span>В наличии</span>
-                <p>Отливаются из пластика вместе с кейкапом методом двойного литья — Double-shot.</p>
+                <p>
+                  Отливаются из пластика вместе с кейкапом методом двойного
+                  литья — Double-shot.
+                </p>
               </div>
               <div className={Styles.price__block}>
                 <h3>{product.price} ₽</h3>
@@ -62,9 +64,7 @@ export default function ProductPage() {
                 <button>В корзину</button>
                 <p>Осталась 1 шт, завтра может закончиться</p>
               </div>
-              <div className={Styles.ship__block}>
-                {/*  */}
-              </div>
+              <div className={Styles.ship__block}>{/*  */}</div>
             </div>
           </div>
           <div className={Styles.item__about}>
@@ -104,22 +104,25 @@ export default function ProductPage() {
               </button>
             </div>
             <div className={Styles.about__content}>
-              <div className={Styles.description__block} id="description__block">
-              {Array(product.description)
+              <div
+                className={Styles.description__block}
+                id="description__block"
+              >
+                {Array(product.description)
                   .fill(<p>{product.description}</p>)
                   .map((description, index) => (
                     <span key={index}>{description}</span>
                   ))}
               </div>
               <div className={Styles.features__block} id="features__block">
-              {Array(product.feature)
+                {Array(product.feature)
                   .fill(<p>{product.feature}</p>)
                   .map((feature, index) => (
                     <span key={index}>{feature}</span>
                   ))}
               </div>
               <div className={Styles.reviews__block} id="reviews__block">
-              {Array(product.reviews)
+                {Array(product.reviews)
                   .fill(<p>{product.reviews}</p>)
                   .map((reviews, index) => (
                     <span key={index}>{reviews}</span>
