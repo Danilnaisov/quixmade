@@ -64,3 +64,68 @@ export const loadProductBySlug = async (slug) => {
     return null;
   }
 };
+
+export const loadProductById = async (id) => {
+  try {
+    const response = await fetch(`${endpoint}product?id=${id}`);
+    if (!response.ok) {
+      throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+    }
+    const product = await response.json();
+    return product;
+  } catch (error) {
+    console.error("Ошибка при загрузке продукта по ID:", error.message);
+    return null;
+  }
+};
+
+export const loadReviewsByProductId = async (productId) => {
+  try {
+    const response = await fetch(`${endpoint}review?productid=${productId}`);
+    if (!response.ok) {
+      throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+    }
+    const reviews = await response.json();
+    return reviews;
+  } catch (error) {
+    console.error("Ошибка при загрузке отзывов по ID продукта:", error.message);
+    return [];
+  }
+};
+
+export const updateProduct = async (product) => {
+  try {
+    const response = await fetch(`${endpoint}product`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(product),
+    });
+    return response;
+  } catch (error) {
+    console.error("Ошибка при обновлении продукта:", error);
+    throw error;
+  }
+};
+
+export const uploadImage = async (file, type, slug) => {
+  const formData = new FormData();
+  formData.append("image", file);
+  formData.append("type", type);
+  formData.append("slug", slug);
+  console.log(formData);
+  try {
+    const response = await fetch(`${endpoint}upload`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Ошибка в uploadImage:", error);
+    throw error;
+  }
+};

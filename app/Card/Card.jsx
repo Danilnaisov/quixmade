@@ -1,20 +1,43 @@
+import { useEffect, useState } from "react";
 import React from "react";
 import Link from "next/link";
 import Styles from "./Card.module.css";
+import { loadReviewsByProductId } from "@/app/api/api_utils";
 
 const Card = ({ product }) => {
+  const [averageStars, setAverageStars] = useState(0);
+  const [reviewsCount, setReviewsCount] = useState(0);
+
+  useEffect(() => {
+    async function fetchReviews() {
+      if (product.id) {
+        const reviewsData = await loadReviewsByProductId(product.id);
+        setReviewsCount(reviewsData.length);
+
+        if (reviewsData.length > 0) {
+          const totalStars = reviewsData.reduce(
+            (sum, review) => sum + review.stars,
+            0
+          );
+          setAverageStars(totalStars / reviewsData.length);
+        }
+      }
+    }
+    fetchReviews();
+  }, [product.id]);
+
   const saleBadge = product.isSale ? (
     <div className={`${Styles.item__c_block} ${Styles.item__sale}`}>Sale</div>
   ) : null;
 
-  const wirelessBadge = product.isWireless ? (
+  const wirelessBadge = product.feature.isWireless[1] ? (
     <div className={`${Styles.item__c_block} ${Styles.item__wireless}`}>
       Wireless
     </div>
   ) : null;
 
   const notInStockBadge =
-    product.status === "not in stock" ? (
+    product.feature.status[1] == 0 ? (
       <div className={`${Styles.item__c_block} ${Styles.item__notinstock}`}>
         Нет в наличии
       </div>
@@ -34,8 +57,8 @@ const Card = ({ product }) => {
               src={product.image}
               alt={product.title}
               onError={(e) => {
-                e.target.onerror = null; // Prevents an infinite loop in case the fallback image fails to load
-                e.target.src = "/data/images/notfound.png"; // Fallback image
+                e.target.onerror = null;
+                e.target.src = "/data/images/notfound.png";
               }}
             />
           </div>
@@ -55,7 +78,7 @@ const Card = ({ product }) => {
               )}
             </div>
             <div className={Styles.text__right}>
-              {Array(product.stars)
+              {Array(Math.round(averageStars))
                 .fill(<img src="/img/svg/star.svg" alt="star" />)
                 .map((star, index) => (
                   <span key={index}>{star}</span>

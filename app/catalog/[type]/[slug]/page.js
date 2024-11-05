@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { loadProductBySlug } from "../../../api/api_utils"; // Adjust the path as necessary
+import { loadProductBySlug, loadReviewsByProductId } from "@/app/api/api_utils"; // Adjust the path as necessary
 import { Preloader } from "@/app/components/Preloader/Preloader";
 import { Notfound } from "@/app/components/Notfound/Notfound"; // Import your Notfound component
 import { useParams } from "next/navigation"; // Import useParams
@@ -12,17 +12,33 @@ export default function ProductPage() {
   const { slug } = useParams();
   const [preloaderVisible, setPreloaderVisible] = useState(true);
   const [product, setProduct] = useState(null);
+  const [reviewsCount, setReviewsCount] = useState(0);
+  const [averageStars, setAverageStars] = useState(0);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     async function fetchProduct() {
       if (slug) {
         const productData = await loadProductBySlug(slug);
         setProduct(productData);
+        const reviews = await loadReviewsByProductId(productData.id);
+        setReviewsCount(reviews.length);
+
+        if (reviews.length > 0) {
+          const totalStars = reviews.reduce(
+            (acc, review) => acc + review.stars,
+            0
+          );
+          setAverageStars(parseFloat((totalStars / reviews.length).toFixed(2)));
+        }
+        const reviewsData = await loadReviewsByProductId(productData.id);
+        setReviews(reviewsData);
       }
       setPreloaderVisible(false);
     }
     fetchProduct();
   }, [slug]);
+
   return (
     <PageTemplate>
       {product ? (
@@ -35,26 +51,23 @@ export default function ProductPage() {
               <h1 className={Styles.item__name}>{product.title}</h1>
               <p className={Styles.item__article}>{product.article}</p>
               <div className={Styles.item__reviews}>
-                {Array(product.stars)
-                  .fill(<img src="/img/svg/star.svg" alt="star" />)
-                  .map((star, index) => (
-                    <span key={index}>{star}</span>
-                  ))}
-                <span>{product.stars} отзывов</span>
+                <div>
+                  {Array(Math.round(averageStars))
+                    .fill(<img src="/img/svg/star.svg" alt="star" />)
+                    .map((star, index) => (
+                      <span key={index}>{star}</span>
+                    ))}
+                </div>
+                <span>{reviewsCount} отзывов</span>
               </div>
               <p className={Styles.item__subname}>Переключатели</p>
               <div className={Styles.switch__block}>
                 <div className={Styles.switch__color}></div>
-                <p>{product.switchBrand}</p>
+                <p>{product.feature.switch.brand}</p>
               </div>
               <p className={Styles.item__subname}>Раскладка от производителя</p>
-              <div className={Styles.language__block}>
-                <h3>Русская</h3>
-                <span>В наличии</span>
-                <p>
-                  Отливаются из пластика вместе с кейкапом методом двойного
-                  литья — Double-shot.
-                </p>
+              <div className={Styles.language}>
+                <h3>{product.feature.language}</h3>
               </div>
               <div className={Styles.price__block}>
                 <h3>{product.price} ₽</h3>
@@ -108,25 +121,61 @@ export default function ProductPage() {
                 className={Styles.description__block}
                 id="description__block"
               >
-                {Array(product.description)
-                  .fill(<p>{product.description}</p>)
-                  .map((description, index) => (
-                    <span key={index}>{description}</span>
-                  ))}
+                <h3>{product.shortDescription}</h3>
+                {product.descriptionTitle.map((title, index) => (
+                  <div key={index}>
+                    <h3>{title}</h3>
+                    <p>{product.descriptionText[index]}</p>
+                  </div>
+                ))}
               </div>
               <div className={Styles.features__block} id="features__block">
-                {Array(product.feature)
-                  .fill(<p>{product.feature}</p>)
-                  .map((feature, index) => (
-                    <span key={index}>{feature}</span>
-                  ))}
+                {Object.entries(product.feature).map(([key, value]) => {
+                  let featureName;
+                  let featureValue;
+
+                  if (Array.isArray(value)) {
+                    featureName = value[0];
+                    featureValue = value[1];
+                  } else if (typeof value === "object" && value !== null) {
+                    featureName = "Переключатель";
+                    featureValue = `${value.brand}`;
+                  } else {
+                    featureName = key;
+                    featureValue = value;
+                  }
+                  return (
+                    <div
+                      key={key}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span>{featureName}</span>
+                      <span>{String(featureValue)}</span>
+                    </div>
+                  );
+                })}
               </div>
               <div className={Styles.reviews__block} id="reviews__block">
-                {Array(product.reviews)
-                  .fill(<p>{product.reviews}</p>)
-                  .map((reviews, index) => (
-                    <span key={index}>{reviews}</span>
-                  ))}
+                {reviews.map((review) => (
+                  <div key={review.id} className={Styles.review}>
+                    <p>{review.text}</p>
+                    <p>
+                      {Array(review.stars)
+                        .fill(<img src="/img/svg/star.svg" alt="star" />)
+                        .map((star, index) => (
+                          <span key={index}>{star}</span>
+                        ))}
+                    </p>
+                    <p>Отзыв на: {product.title}</p>
+                    <p>
+                      {review.userName},{" "}
+                      {new Date(review.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
