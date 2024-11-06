@@ -16,14 +16,9 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-app.use(cors(corsOptions));
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-// app.use((req, res, next) => {
-//   console.log("Проверка данных перед multer:", req.body);
-//   next();
-// });
+app.use(express.urlencoded({ extended: true }));
+app.use(cors(corsOptions));
 
 const imageUploadPath = "/quixmade/public/data";
 

@@ -41,7 +41,6 @@ export default function ProductPage() {
         console.log("Тип не определен:", product.type);
         return;
       }
-
       let imagePath = product.image;
       if (imageFile) {
         const formData = new FormData();
@@ -50,7 +49,11 @@ export default function ProductPage() {
         const response = await fetch(`${endpoint}image-upload`, {
           method: "POST",
           body: formData,
+          headers: { "Content-Type": "multipart/form-data" },
         });
+
+        console.log("FormData path:", formData.get("path"));
+        console.log("FormData filename:", formData.get("filename"));
 
         if (response.ok) {
           const data = await response.json();
