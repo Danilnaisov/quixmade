@@ -38,14 +38,14 @@ export default function ProductPage() {
   const handleSave = async () => {
     try {
       if (!product.type) {
-        console.log("Тип не определены:", product.type);
+        console.log("Тип не определен:", product.type);
         return;
       }
-      console.log("Отправляем данные:", product.type, product.slug);
+
+      let imagePath = product.image;
       if (imageFile) {
         const formData = new FormData();
         formData.append("image", imageFile);
-        // formData.append("product", product);
 
         const response = await fetch(`${endpoint}image-upload`, {
           method: "POST",
@@ -53,41 +53,37 @@ export default function ProductPage() {
         });
 
         if (response.ok) {
-          const data = await response.json(); // Parse the response
+          const data = await response.json();
           if (data && data.message) {
-            console.log("старый product.image", product.image);
             console.log("Изображение загружено в:", data.message);
-            setProduct((prevProduct) => ({
-              ...prevProduct,
-              image: data.message,
-            }));
-            const updatedProduct = {
-              ...product,
-              image: data.message,
-            };
-            const updateResponse = await updateProduct(updatedProduct);
-            if (updateResponse.ok) {
-              alert("Данные успешно обновлены");
-              console.log("new product.image", updatedProduct.image);
-            } else {
-              alert("Ошибка при сохранении данных");
-            }
+            imagePath = data.message;
           } else {
-            console.error("Server response is missing 'message'");
+            console.error("Ответ сервера не содержит 'message'");
+            alert("Ошибка при загрузке изображения");
+            return;
           }
         } else {
-          console.error("Failed to upload image, status:", response.status);
+          console.error(
+            "Не удалось загрузить изображение, статус:",
+            response.status
+          );
+          alert("Ошибка при загрузке изображения");
+          return;
         }
-      } else {
-        console.log("Файл не выбран.");
       }
-      // const response = await updateProduct(product);
-      // if (response.ok) {
-      //   alert("Данные успешно обновлены");
-      //   console.log("new product.image", product.image);
-      // } else {
-      //   alert("Ошибка при сохранении данных");
-      // }
+
+      const updatedProduct = {
+        ...product,
+        image: imagePath,
+      };
+
+      const updateResponse = await updateProduct(updatedProduct);
+      if (updateResponse.ok) {
+        alert("Данные успешно обновлены");
+        console.log("new product.image", updatedProduct.image);
+      } else {
+        alert("Ошибка при сохранении данных");
+      }
     } catch (error) {
       console.error("Ошибка при обновлении данных:", error);
       alert("Ошибка при обновлении данных");
