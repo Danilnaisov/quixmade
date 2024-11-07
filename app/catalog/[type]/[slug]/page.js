@@ -45,8 +45,19 @@ export default function ProductPage() {
         <>
           <div className={Styles.item__main__block}>
             <div className={Styles.item__images__block}>
-              <img src={product.image} />
+              {Array.isArray(product.image) ? (
+                product.image.map((imgPath, index) => (
+                  <img
+                    key={index}
+                    src={imgPath}
+                    alt={`Product image ${index + 1}`}
+                  />
+                ))
+              ) : (
+                <img src={product.image} alt="Product image" />
+              )}
             </div>
+
             <div className={Styles.item__info__block}>
               <h1 className={Styles.item__name}>{product.title}</h1>
               <p className={Styles.item__article}>{product.article}</p>

@@ -3,7 +3,6 @@ import cors from "cors";
 import path from "path";
 import sqlite3 from "sqlite3";
 import fs from "fs";
-import multer from "multer";
 import busboy from "busboy";
 
 const app = express();
@@ -16,23 +15,24 @@ app.use(express.json());
 app.use("/image-upload", express.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: ["https://made.quixoria.ru", "http://localhost:3000"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: ["https://made.quixoria.ru"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
 
 const imageUploadPath = "/quixmade/public/data";
-const tempUploadPath = "/quixmade/public/temp"; // Временная директория для хранения файла
-let nowdate;
+const tempUploadPath = "/quixmade/public/temp";
+
 app.post("/image-upload", (req, res) => {
   console.log("POST request");
 
   const bb = busboy({ headers: req.headers });
-
   let type, slug;
-  let tempFilePath;
+  const filePaths = [];
+  let fileCount = 0;
+  let processedCount = 0;
 
   bb.on("field", (name, val) => {
     console.log(`Field [${name}]: value: %j`, val);
@@ -44,6 +44,7 @@ app.post("/image-upload", (req, res) => {
   });
 
   bb.on("file", (name, file, info) => {
+    fileCount++; // Увеличиваем количество файлов
     const { filename, encoding, mimeType } = info;
     console.log(
       `File [${name}]: filename: %j, encoding: %j, mimeType: %j`,
@@ -52,54 +53,76 @@ app.post("/image-upload", (req, res) => {
       mimeType
     );
 
-    // Сохраняем файл временно
-    const tempFileName = `temp_${Date.now()}.png`;
-    tempFilePath = path.join(tempUploadPath, tempFileName);
+    const tempFileName = `temp_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}.png`;
+    const tempFilePath = path.join(tempUploadPath, tempFileName);
 
     const writeStream = fs.createWriteStream(tempFilePath);
     file.pipe(writeStream);
 
-    writeStream.on("close", () => {
+    writeStream.on("close", async () => {
       console.log(`File temporarily saved to ${tempFilePath}`);
 
       if (!type || !slug) {
         console.error("Missing 'type' or 'slug' field");
-        res.status(400).send("Missing 'type' or 'slug' field");
+        res.status(400).json({ error: "Missing 'type' or 'slug' field" });
         return;
       }
 
-      // Генерация пути и имени для окончательного файла
-      nowdate = new Date().toISOString().replace(/[-T:.Z]/g, "");
-      const dirPath = path.join(imageUploadPath, type, slug);
+      try {
+        const nowdate = new Date().toISOString().replace(/[-T:.Z]/g, "");
+        const dirPath = path.join(imageUploadPath, type, slug);
+        fs.mkdirSync(dirPath, { recursive: true });
 
-      // Создаем директорию, если она не существует
-      fs.mkdirSync(dirPath, { recursive: true });
-
-      // Генерация пути для окончательного файла
-      const finalFilePath = path.join(dirPath, `image_${slug}_${nowdate}.png`);
-
-      // Перемещаем и переименовываем файл
-      fs.rename(tempFilePath, finalFilePath, (err) => {
-        if (err) {
-          console.error("Error renaming file:", err);
-          res.status(500).send("Error saving file");
-          return;
-        }
-
-        console.log(`File moved to ${finalFilePath}`);
-
-        res.status(200).json({
-          message: `/data/${type}/${slug}/image_${slug}_${nowdate}.png`,
+        const finalFilePath = path.join(
+          dirPath,
+          `image_${slug}_${nowdate}_${Math.random()
+            .toString(36)
+            .substr(2, 5)}.png`
+        );
+        await new Promise((resolve, reject) => {
+          fs.rename(tempFilePath, finalFilePath, (err) => {
+            if (err) {
+              console.error("Error renaming file:", err);
+              reject(err);
+            } else {
+              console.log(`File moved to ${finalFilePath}`);
+              filePaths.push(finalFilePath.replace("/quixmade/public", ""));
+              resolve();
+            }
+          });
         });
-      });
+      } catch (error) {
+        console.error("Error processing file:", error);
+        res.status(500).json({ error: "Error processing file" });
+      } finally {
+        processedCount++; // Увеличиваем счётчик обработанных файлов
+
+        // Если все файлы обработаны, отправляем ответ
+        if (processedCount === fileCount) {
+          if (filePaths.length > 0) {
+            console.log("Sending file paths:", filePaths);
+            res.json({ message: filePaths });
+          } else {
+            console.error("No files were processed");
+            res.status(500).json({ error: "No files were processed" });
+          }
+        }
+      }
     });
   });
 
   bb.on("close", () => {
     console.log("Done parsing form!");
+    // Если нет файлов, отправляем ответ сразу
+    if (fileCount === 0) {
+      console.error("No files were provided");
+      res.status(400).json({ error: "No files were provided" });
+    }
   });
 
-  return req.pipe(bb);
+  req.pipe(bb);
 });
 
 // app.post("/image-upload", imageUpload.single("image"), (req, res) => {
@@ -148,6 +171,7 @@ async function loadAllProducts() {
         const processedRows = rows.map((row) => {
           return {
             ...row,
+            image: JSON.parse(row.image),
             descriptionTitle: JSON.parse(row.descriptionTitle),
             descriptionText: JSON.parse(row.descriptionText),
             feature: JSON.parse(row.feature),
@@ -282,7 +306,7 @@ app.put("/product", (req, res) => {
     updatedProduct.price,
     updatedProduct.saleprice,
     updatedProduct.isSale,
-    updatedProduct.image,
+    JSON.stringify(updatedProduct.image),
     updatedProduct.isHotHit,
     JSON.stringify(updatedProduct.descriptionTitle),
     JSON.stringify(updatedProduct.descriptionText),

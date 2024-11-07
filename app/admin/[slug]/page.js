@@ -19,10 +19,87 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function ProductPage() {
   const { slug } = useParams();
-  const [preloaderVisible, setPreloaderVisible] = useState(true);
   const [product, setProduct] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
+  const [preloaderVisible, setPreloaderVisible] = useState(true);
   const [detailedDescription, setDetailedDescription] = useState("");
+  const [imageFiles, setImageFiles] = useState([]);
+
+  function handleFileInput(event) {
+    const files = event.target.files;
+    const images = [];
+
+    for (let i = 0; i < files.length; i++) {
+      images.push(files[i]);
+    }
+
+    console.log("Изображения загружены:", images);
+    setImageFiles(images);
+  }
+
+  const handleSave = async () => {
+    try {
+      if (!product.type || !product.slug) {
+        console.log("Не указаны все параметры:", product);
+        return;
+      }
+
+      if (imageFiles.length > 0) {
+        const formData = new FormData();
+        for (const file of imageFiles) {
+          formData.append("image", file);
+        }
+        formData.append("type", product.type);
+        formData.append("slug", product.slug);
+
+        const response = await fetch(
+          "https://api.made.quixoria.ru/image-upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        console.log("FormData type:", formData.get("type"));
+        console.log("FormData slug:", formData.get("slug"));
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.message) {
+            console.log("Изображения загружены:", data.message);
+            product.image = data.message;
+          } else {
+            console.error("Ответ сервера не содержит 'message'");
+            toast.error("Ошибка при загрузке изображений");
+            return;
+          }
+        } else {
+          console.error(
+            "Не удалось загрузить изображения, статус:",
+            response.status
+          );
+          toast.error("Ошибка при загрузке изображений");
+          return;
+        }
+      }
+
+      // После загрузки изображения сохраняем описание
+      await saveDescription();
+      const updatedProduct = await saveDescription();
+
+      setProduct(updatedProduct);
+
+      const updateResponse = await updateProduct(updatedProduct);
+      if (updateResponse.ok) {
+        toast.success("Данные успешно обновлены");
+        console.log("new product.image", updatedProduct.image);
+      } else {
+        toast.error("Ошибка при сохранении данных");
+      }
+    } catch (error) {
+      console.error("Ошибка при обновлении данных:", error);
+      toast.error("Ошибка при обновлении данных");
+    }
+  };
 
   const formatDescription = (product) => {
     return product.descriptionTitle
@@ -58,94 +135,6 @@ export default function ProductPage() {
     } catch (error) {
       console.error("Error while saving the product:", error);
       throw error;
-    }
-  };
-
-  const handleFileInput = (e) => {
-    console.log("handleFileInput working!");
-    const file = e.target.files[0];
-    console.log(file);
-
-    if (file) {
-      setImageFile(file);
-    } else {
-      console.log("Файл не выбран");
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      if (!product.type || !product.slug) {
-        console.log("Не указаны все параметры:", product);
-        return;
-      }
-
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("image", imageFile); // Убедитесь, что ключ "image" совпадает с ключом в `busboy.on("file", ...)`
-        formData.append("type", product.type);
-        formData.append("slug", product.slug);
-
-        const response = await fetch(
-          "https://api.made.quixoria.ru/image-upload",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        console.log("FormData type:", formData.get("type"));
-        console.log("FormData slug:", formData.get("slug"));
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.message) {
-            console.log("Изображение загружено в:", data.message);
-            // Обновляем путь изображения в объекте продукта
-            product.image = data.message;
-
-            // Переходим к сохранению продукта с новым путем изображения
-            await saveDescription();
-            const updatedProduct = await saveDescription();
-
-            setProduct(updatedProduct);
-
-            const updateResponse = await updateProduct(updatedProduct);
-            if (updateResponse.ok) {
-              toast.success("Данные успешно обновлены");
-              console.log("new product.image", updatedProduct.image);
-            } else {
-              toast.error("Ошибка при сохранении данных");
-            }
-          } else {
-            console.error("Ответ сервера не содержит 'message'");
-            toast.error("Ошибка при загрузке изображения");
-          }
-        } else {
-          console.error(
-            "Не удалось загрузить изображение, статус:",
-            response.status
-          );
-          toast.error("Ошибка при загрузке изображения");
-        }
-      }
-
-      // После загрузки изображения сохраняем описание
-      await saveDescription();
-      const updatedProduct = await saveDescription();
-
-      setProduct(updatedProduct);
-
-      const updateResponse = await updateProduct(updatedProduct);
-      if (updateResponse.ok) {
-        toast.success("Данные успешно обновлены");
-        console.log("new product.image", updatedProduct.image);
-      } else {
-        toast.error("Ошибка при сохранении данных");
-      }
-    } catch (error) {
-      console.error("Ошибка при обновлении данных:", error);
-      toast.error("Ошибка при обновлении данных");
     }
   };
 
