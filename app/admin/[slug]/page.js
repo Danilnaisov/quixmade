@@ -75,32 +75,51 @@ export default function ProductPage() {
 
   const handleSave = async () => {
     try {
-      if (!product.type) {
-        console.log("Тип не определен:", product.type);
+      if (!product.type || !product.slug) {
+        console.log("Не указаны все параметры:", product);
         return;
       }
-      let imagePath = product.image;
+
       if (imageFile) {
         const formData = new FormData();
-        formData.append("image", imageFile);
+        formData.append("image", imageFile); // Убедитесь, что ключ "image" совпадает с ключом в `busboy.on("file", ...)`
+        formData.append("type", product.type);
+        formData.append("slug", product.slug);
 
-        const response = await fetch(`${endpoint}image-upload`, {
-          method: "POST",
-          body: formData,
-        });
+        const response = await fetch(
+          "https://api.made.quixoria.ru/image-upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
 
-        console.log("FormData path:", formData.get("path"));
-        console.log("FormData filename:", formData.get("filename"));
+        console.log("FormData type:", formData.get("type"));
+        console.log("FormData slug:", formData.get("slug"));
 
         if (response.ok) {
           const data = await response.json();
           if (data && data.message) {
             console.log("Изображение загружено в:", data.message);
-            imagePath = data.message;
+            // Обновляем путь изображения в объекте продукта
+            product.image = data.message;
+
+            // Переходим к сохранению продукта с новым путем изображения
+            await saveDescription();
+            const updatedProduct = await saveDescription();
+
+            setProduct(updatedProduct);
+
+            const updateResponse = await updateProduct(updatedProduct);
+            if (updateResponse.ok) {
+              toast.success("Данные успешно обновлены");
+              console.log("new product.image", updatedProduct.image);
+            } else {
+              toast.error("Ошибка при сохранении данных");
+            }
           } else {
             console.error("Ответ сервера не содержит 'message'");
             toast.error("Ошибка при загрузке изображения");
-            return;
           }
         } else {
           console.error(
@@ -108,10 +127,10 @@ export default function ProductPage() {
             response.status
           );
           toast.error("Ошибка при загрузке изображения");
-          return;
         }
       }
 
+      // После загрузки изображения сохраняем описание
       await saveDescription();
       const updatedProduct = await saveDescription();
 

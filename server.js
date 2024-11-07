@@ -4,60 +4,102 @@ import path from "path";
 import sqlite3 from "sqlite3";
 import fs from "fs";
 import multer from "multer";
+import busboy from "busboy";
 
 const app = express();
 const __dirname = path.dirname(new URL(import.meta.url).pathname); // Получаем dirname
 const DATA_DIR = path.join(__dirname, "./app/api/data/"); // Путь к данным
 const db = new sqlite3.Database(path.join(DATA_DIR, "data.db")); // Подключаем базу данных
-//
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use("/image-upload", express.urlencoded({ extended: true }));
+
 const corsOptions = {
   origin: ["https://made.quixoria.ru", "http://localhost:3000"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 
 const imageUploadPath = "/quixmade/public/data";
+const tempUploadPath = "/quixmade/public/temp"; // Временная директория для хранения файла
+let nowdate;
+app.post("/image-upload", (req, res) => {
+  console.log("POST request");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // req.body = req.body;
-    // const { type } = req.body;
-    console.log("multer req.body = ", req.type);
-    // console.log("multer type = ", type);
-    console.log("Тип из тела запроса (обработка в const storage):", req.type);
-    // if (!type) {
-    //   return cb(new Error("Type missing"), false);
-    // }
-    const uploadPath = `${imageUploadPath}`;
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}_${file.originalname}`);
-  },
-});
+  const bb = busboy({ headers: req.headers });
 
-const imageUpload = multer({
-  storage: storage,
-  limits: { fileSize: 15 * 1024 * 1024 },
-});
+  let type, slug;
+  let tempFilePath;
 
-app.post("/image-upload", imageUpload.single("image"), (req, res) => {
-  if (req.file) {
-    console.log("File received:", req.file);
-  } else {
-    console.error("No file uploaded");
-  }
-  try {
-    fs.mkdirSync(`/quixmade/public/data/`, { recursive: true });
-    res.status(200).json({ message: `/data/${req.file.filename}` });
-  } catch (error) {
-    console.error("File save error:", error);
-    res.status(500).json({ error: "Failed to save image" });
-  }
+  bb.on("field", (name, val) => {
+    console.log(`Field [${name}]: value: %j`, val);
+    if (name === "type") {
+      type = val;
+    } else if (name === "slug") {
+      slug = val;
+    }
+  });
+
+  bb.on("file", (name, file, info) => {
+    const { filename, encoding, mimeType } = info;
+    console.log(
+      `File [${name}]: filename: %j, encoding: %j, mimeType: %j`,
+      filename,
+      encoding,
+      mimeType
+    );
+
+    // Сохраняем файл временно
+    const tempFileName = `temp_${Date.now()}.png`;
+    tempFilePath = path.join(tempUploadPath, tempFileName);
+
+    const writeStream = fs.createWriteStream(tempFilePath);
+    file.pipe(writeStream);
+
+    writeStream.on("close", () => {
+      console.log(`File temporarily saved to ${tempFilePath}`);
+
+      if (!type || !slug) {
+        console.error("Missing 'type' or 'slug' field");
+        res.status(400).send("Missing 'type' or 'slug' field");
+        return;
+      }
+
+      // Генерация пути и имени для окончательного файла
+      nowdate = new Date().toISOString().replace(/[-T:.Z]/g, "");
+      const dirPath = path.join(imageUploadPath, type, slug);
+
+      // Создаем директорию, если она не существует
+      fs.mkdirSync(dirPath, { recursive: true });
+
+      // Генерация пути для окончательного файла
+      const finalFilePath = path.join(dirPath, `image_${slug}_${nowdate}.png`);
+
+      // Перемещаем и переименовываем файл
+      fs.rename(tempFilePath, finalFilePath, (err) => {
+        if (err) {
+          console.error("Error renaming file:", err);
+          res.status(500).send("Error saving file");
+          return;
+        }
+
+        console.log(`File moved to ${finalFilePath}`);
+
+        res.status(200).json({
+          message: `/data/${type}/${slug}/image_${slug}_${nowdate}.png`,
+        });
+      });
+    });
+  });
+
+  bb.on("close", () => {
+    console.log("Done parsing form!");
+  });
+
+  return req.pipe(bb);
 });
 
 // app.post("/image-upload", imageUpload.single("image"), (req, res) => {
