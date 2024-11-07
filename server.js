@@ -9,9 +9,9 @@ const app = express();
 const __dirname = path.dirname(new URL(import.meta.url).pathname); // Получаем dirname
 const DATA_DIR = path.join(__dirname, "./app/api/data/"); // Путь к данным
 const db = new sqlite3.Database(path.join(DATA_DIR, "data.db")); // Подключаем базу данных
-
+//
 const corsOptions = {
-  origin: "https://made.quixoria.ru",
+  origin: ["https://made.quixoria.ru", "http://localhost:3000"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };

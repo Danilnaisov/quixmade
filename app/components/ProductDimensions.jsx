@@ -17,7 +17,7 @@ const ProductDimensions = ({ product, setProduct }) => {
   };
 
   return (
-    <div className={Styles.item__data__row}>
+    <div className={`${Styles.item__data__row} ${Styles.item__data__number}`}>
       <h3>{product.feature.dimensions[0]}</h3>
       {dimensions.map((dimension, index) => (
         <input
