@@ -15,7 +15,7 @@
   border-radius: 40px;
   display: flex;
   flex-direction: row;
-  justify-content: start;
+  justify-content: flex-start;
   background: #fff;
   align-items: center;
   gap: 20px;

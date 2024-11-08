@@ -4,27 +4,28 @@ import path from "path";
 import sqlite3 from "sqlite3";
 import fs from "fs";
 import busboy from "busboy";
-import { updateProduct } from "./app/api/api_utils.js";
 
 const app = express();
 const __dirname = path.dirname(new URL(import.meta.url).pathname); // Получаем dirname
-const DATA_DIR = path.join(__dirname, "./app/api/data/"); // Путь к данным
-const db = new sqlite3.Database(path.join(DATA_DIR, "data.db")); // Подключаем базу данных
+const DATA_DIR = path.join(__dirname, "/data");
+const db = new sqlite3.Database(path.join(DATA_DIR, "data.db"));
 
+app.use(express.static("public", { maxAge: 0 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/image-upload", express.urlencoded({ extended: true }));
+app.use("/data", express.static(path.join(process.cwd(), "data")));
 
-const corsOptions = {
-  origin: ["https://made.quixoria.ru"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+// https://made.quixoria.ru
+app.use(
+  cors({
+    origin: "*", // Разрешаем доступ с этого домена
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "*"], // Разрешаем все заголовки
+  })
+);
 
-app.use(cors(corsOptions));
-
-const imageUploadPath = "/quixmade/public/data";
-const tempUploadPath = "/quixmade/public/temp";
+app.options("/image-upload", cors());
 
 app.post("/image-upload", (req, res) => {
   console.log("POST request");
@@ -32,8 +33,8 @@ app.post("/image-upload", (req, res) => {
   const bb = busboy({ headers: req.headers });
   let type, slug;
   const filePaths = [];
-  let fileCount = 0;
-  let processedCount = 0;
+  const filePromises = [];
+  const tempFiles = [];
 
   bb.on("field", (name, val) => {
     console.log(`Field [${name}]: value: %j`, val);
@@ -45,45 +46,44 @@ app.post("/image-upload", (req, res) => {
   });
 
   bb.on("file", (name, file, info) => {
-    fileCount++;
-    const { filename, encoding, mimeType } = info;
-    console.log(
-      `File [${name}]: filename: %j, encoding: %j, mimeType: %j`,
-      filename,
-      encoding,
-      mimeType
-    );
+    const { filename } = info;
+    if (!filename) {
+      console.error("No filename provided");
+      return res.status(400).json({ error: "No file uploaded" });
+    }
 
     const tempFileName = `temp_${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.png`;
-    const tempFilePath = path.join(tempUploadPath, tempFileName);
-
+    const tempFilePath = path.join(DATA_DIR, "temp", tempFileName);
     const writeStream = fs.createWriteStream(tempFilePath);
     file.pipe(writeStream);
 
-    writeStream.on("close", async () => {
-      console.log(`File temporarily saved to ${tempFilePath}`);
+    tempFiles.push({ tempFilePath, filename });
+    filePromises.push(
+      new Promise((resolve) => writeStream.on("close", resolve))
+    );
+  });
 
-      // Проверка на отсутствие обязательных полей ДО начала обработки файлов
-      if (!type || !slug) {
-        const errorMessage = !type
-          ? "Missing 'type' field"
-          : "Missing 'slug' field";
-        console.error(errorMessage);
-        // return res.status(400).json({ error: errorMessage }); // Завершаем выполнение запроса здесь
-      }
+  bb.on("close", async () => {
+    console.log("Done parsing form!");
 
-      try {
-        const nowdate = new Date().toISOString().replace(/[-T:.Z]/g, "");
-        const dirPath = path.join(imageUploadPath, type, slug);
+    if (!type || !slug) {
+      console.error("Missing 'type' or 'slug' field");
+      return res.status(400).json({ error: "Missing 'type' or 'slug' field" });
+    }
 
-        if (!fs.existsSync(dirPath)) {
-          // Создаем папку, если она не существует
-          fs.mkdirSync(dirPath, { recursive: true });
-          console.log(`Directory created: ${dirPath}`);
-        }
+    await Promise.all(filePromises);
 
+    const nowdate = new Date().toISOString().replace(/[-T:.Z]/g, "");
+    const dirPath = path.join(DATA_DIR, type, slug);
+
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+
+    const fileMovePromises = tempFiles.map(({ tempFilePath }) => {
+      return new Promise((resolve, reject) => {
         const finalFilePath = path.join(
           dirPath,
           `image_${slug}_${nowdate}_${Math.random()
@@ -91,41 +91,21 @@ app.post("/image-upload", (req, res) => {
             .substr(2, 5)}.png`
         );
 
-        await new Promise((resolve, reject) => {
-          fs.rename(tempFilePath, finalFilePath, (err) => {
-            if (err) {
-              console.error("Error renaming file:", err);
-              return reject(err);
-            } else {
-              console.log(`File moved to ${finalFilePath}`);
-              filePaths.push(finalFilePath.replace("/quixmade/public", ""));
-              resolve();
-            }
-          });
+        fs.rename(tempFilePath, finalFilePath, (err) => {
+          if (err) return reject(err);
+          filePaths.push(finalFilePath.replace(DATA_DIR, ""));
+          resolve();
         });
-      } catch (error) {
-        console.error("Error processing file:", error);
-      } finally {
-        processedCount++;
-
-        // Отправляем ответ только после обработки всех файлов
-        if (processedCount === fileCount) {
-          if (filePaths.length > 0) {
-            console.log("Sending file paths:", filePaths);
-            return res.json({ message: filePaths });
-          } else {
-            console.error("No files were processed");
-          }
-        }
-      }
+      });
     });
-  });
 
-  bb.on("close", () => {
-    console.log("Done parsing form!");
-    if (fileCount === 0) {
-      console.error("No files were provided");
-      // return res.status(400).json({ error: "No files were provided" });
+    try {
+      await Promise.all(fileMovePromises);
+      console.log("Sending file paths:", filePaths);
+      res.json({ message: filePaths });
+    } catch (err) {
+      console.error("Error processing files:", err);
+      res.status(500).json({ error: "Error processing files" });
     }
   });
 

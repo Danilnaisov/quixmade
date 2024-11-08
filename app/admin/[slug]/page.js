@@ -39,12 +39,20 @@ export default function ProductPage() {
       }
 
       if (imageFiles.length > 0) {
+        console.log("type:", product.type);
+        console.log("slug:", product.slug);
         const formData = new FormData();
         for (const file of imageFiles) {
           formData.append("image", file);
         }
         formData.append("type", product.type);
         formData.append("slug", product.slug);
+
+        console.log(
+          "Sending data:",
+          formData.get("type"),
+          formData.get("slug")
+        ); // Добавьте это перед отправкой
 
         const response = await fetch(
           "https://api.made.quixoria.ru/image-upload",
@@ -53,9 +61,6 @@ export default function ProductPage() {
             body: formData,
           }
         );
-
-        console.log("FormData type:", formData.get("type"));
-        console.log("FormData slug:", formData.get("slug"));
 
         if (response.ok) {
           const data = await response.json();

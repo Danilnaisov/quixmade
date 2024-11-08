@@ -1,8 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Styles from "./LongCard.module.css";
-import { endpoint } from "../api/config";
-
+import { endpoint, image_endpoint } from "../api/config";
 const LongCard = ({ product }) => {
   const deleteProduct = async (id) => {
     // Ask for confirmation before deletion
@@ -39,13 +38,15 @@ const LongCard = ({ product }) => {
         >
           <div className={Styles.admin__item__image}>
             <img
-              src={
-                product.image ? product.image[0] : "/data/images/notfound.png"
-              }
+              src={`${image_endpoint}${
+                product.image && product.image[0]
+                  ? product.image[0]
+                  : "/images/notfound.png"
+              }`}
               alt=""
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = "/data/images/notfound.png";
+                e.target.src = `${image_endpoint}/images/notfound.png`;
               }}
             />
           </div>

@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 import Styles from "./Card.module.css";
 import { loadReviewsByProductId } from "@/app/api/api_utils";
+import { image_endpoint } from "../api/config";
 
 const Card = ({ product }) => {
   const [averageStars, setAverageStars] = useState(0);
@@ -52,13 +53,17 @@ const Card = ({ product }) => {
             {wirelessBadge}
             {notInStockBadge}
           </div>
-          <div className={Styles.card__images}>
+          <div className={Styles.card__image}>
             <img
-              src={product.image}
-              alt={product.title}
+              src={`${image_endpoint}${
+                product.image && product.image[0]
+                  ? product.image[0]
+                  : "/images/notfound.png"
+              }`}
+              alt=""
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = "/data/images/notfound.png";
+                e.target.src = `${image_endpoint}/images/notfound.png`;
               }}
             />
           </div>
@@ -68,7 +73,7 @@ const Card = ({ product }) => {
           <hr />
           <div className={Styles.card__text__about}>
             <div className={Styles.text__left}>
-              {product.isSale && product.saleprice ? (
+              {product.isSale ? (
                 <>
                   <span>{product.price} ₽</span>
                   <p className={Styles.salePrice}>{product.saleprice} ₽</p>
