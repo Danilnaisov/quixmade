@@ -6,14 +6,9 @@ import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import PageTemplate from "@/app/components/PageTemplate";
 import Styles from "../AdminPannel.module.css";
-import {
-  loadProductBySlug,
-  updateProduct,
-  uploadImage,
-} from "@/app/api/api_utils";
+import { loadProductBySlug, updateProduct } from "@/app/api/api_utils";
 import Link from "next/link";
 import ProductDimensions from "@/app/components/ProductDimensions";
-import { endpoint } from "@/app/api/config";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -155,16 +150,24 @@ export default function ProductPage() {
     const keys = field.split(".");
 
     setProduct((prevProduct) => {
-      const updatedFeature = { ...prevProduct.feature };
+      const updatedProduct = { ...prevProduct };
+      let target = updatedProduct;
 
-      if (keys.length > 1) {
-        let target = updatedFeature;
-        target = target[keys[1]];
-        target[1] = value;
-        return { ...prevProduct, feature: updatedFeature };
+      if (keys.length === 2) {
+        target = updatedProduct.feature;
+        target[keys[1]][1] = value;
+      } else if (keys.length === 3) {
+        target = updatedProduct.feature.switch;
+        if (typeof target[keys[2]] === "string") {
+          target[keys[2]] = value;
+        } else {
+          target[keys[2]][1] = value;
+        }
       } else {
-        return { ...prevProduct, [field]: value };
+        updatedProduct[field] = value;
       }
+
+      return updatedProduct;
     });
   };
 
@@ -176,10 +179,9 @@ export default function ProductPage() {
       const updatedFeature = { ...prevProduct.feature };
 
       if (keys.length > 1) {
-        let target = updatedFeature[keys[1]];
-
-        target[keys[1]] = checked;
-
+        let target = updatedFeature;
+        target = target[keys[1]];
+        target[1] = checked;
         return { ...prevProduct, feature: updatedFeature };
       } else {
         return { ...prevProduct, [field]: checked };
@@ -426,9 +428,7 @@ export default function ProductPage() {
                 <h3>Краткое описание</h3>
                 <textarea
                   onChange={(e) => handleInputChange(e, "shortDescription")}
-                  // type="text"
                   value={product.shortDescription}
-                  placeholder="Введите краткое описание"
                 />
               </div>
               <div

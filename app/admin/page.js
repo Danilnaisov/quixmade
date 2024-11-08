@@ -21,7 +21,7 @@ const apdminpanel = () => {
       <div className={Styles.main__block}>
         <div className={Styles.items__header}>
           <h3>Товары на сайте</h3>
-          <Link href={""}>
+          <Link href={"/adminpanel"}>
             <img src="/img/svg/add.svg" alt="" />
           </Link>
         </div>

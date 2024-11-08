@@ -4,6 +4,7 @@ import path from "path";
 import sqlite3 from "sqlite3";
 import fs from "fs";
 import busboy from "busboy";
+import { updateProduct } from "./app/api/api_utils.js";
 
 const app = express();
 const __dirname = path.dirname(new URL(import.meta.url).pathname); // Получаем dirname
@@ -44,7 +45,7 @@ app.post("/image-upload", (req, res) => {
   });
 
   bb.on("file", (name, file, info) => {
-    fileCount++; // Увеличиваем количество файлов
+    fileCount++;
     const { filename, encoding, mimeType } = info;
     console.log(
       `File [${name}]: filename: %j, encoding: %j, mimeType: %j`,
@@ -64,16 +65,24 @@ app.post("/image-upload", (req, res) => {
     writeStream.on("close", async () => {
       console.log(`File temporarily saved to ${tempFilePath}`);
 
+      // Проверка на отсутствие обязательных полей ДО начала обработки файлов
       if (!type || !slug) {
-        console.error("Missing 'type' or 'slug' field");
-        res.status(400).json({ error: "Missing 'type' or 'slug' field" });
-        return;
+        const errorMessage = !type
+          ? "Missing 'type' field"
+          : "Missing 'slug' field";
+        console.error(errorMessage);
+        // return res.status(400).json({ error: errorMessage }); // Завершаем выполнение запроса здесь
       }
 
       try {
         const nowdate = new Date().toISOString().replace(/[-T:.Z]/g, "");
         const dirPath = path.join(imageUploadPath, type, slug);
-        fs.mkdirSync(dirPath, { recursive: true });
+
+        if (!fs.existsSync(dirPath)) {
+          // Создаем папку, если она не существует
+          fs.mkdirSync(dirPath, { recursive: true });
+          console.log(`Directory created: ${dirPath}`);
+        }
 
         const finalFilePath = path.join(
           dirPath,
@@ -81,11 +90,12 @@ app.post("/image-upload", (req, res) => {
             .toString(36)
             .substr(2, 5)}.png`
         );
+
         await new Promise((resolve, reject) => {
           fs.rename(tempFilePath, finalFilePath, (err) => {
             if (err) {
               console.error("Error renaming file:", err);
-              reject(err);
+              return reject(err);
             } else {
               console.log(`File moved to ${finalFilePath}`);
               filePaths.push(finalFilePath.replace("/quixmade/public", ""));
@@ -95,18 +105,16 @@ app.post("/image-upload", (req, res) => {
         });
       } catch (error) {
         console.error("Error processing file:", error);
-        res.status(500).json({ error: "Error processing file" });
       } finally {
-        processedCount++; // Увеличиваем счётчик обработанных файлов
+        processedCount++;
 
-        // Если все файлы обработаны, отправляем ответ
+        // Отправляем ответ только после обработки всех файлов
         if (processedCount === fileCount) {
           if (filePaths.length > 0) {
             console.log("Sending file paths:", filePaths);
-            res.json({ message: filePaths });
+            return res.json({ message: filePaths });
           } else {
             console.error("No files were processed");
-            res.status(500).json({ error: "No files were processed" });
           }
         }
       }
@@ -115,10 +123,9 @@ app.post("/image-upload", (req, res) => {
 
   bb.on("close", () => {
     console.log("Done parsing form!");
-    // Если нет файлов, отправляем ответ сразу
     if (fileCount === 0) {
       console.error("No files were provided");
-      res.status(400).json({ error: "No files were provided" });
+      // return res.status(400).json({ error: "No files were provided" });
     }
   });
 
@@ -269,7 +276,7 @@ app.get("/review", async (req, res) => {
       .status(404)
       .json({ detail: "No reviews found for this product" });
   } catch (error) {
-    console.error("Ошибка при загрузке данных:", error); // Отладочная информация
+    console.error("Ошибка при загрузке данных:", error);
     res.status(500).json({ detail: "Ошибка при загрузке данных" });
   }
 });
@@ -292,6 +299,7 @@ app.put("/product", (req, res) => {
     isSale = ?, 
     image = ?, 
     isHotHit = ?, 
+    shortDescription = ?, 
     descriptionTitle = ?, 
     descriptionText = ?, 
     feature = ? 
@@ -308,6 +316,7 @@ app.put("/product", (req, res) => {
     updatedProduct.isSale,
     JSON.stringify(updatedProduct.image),
     updatedProduct.isHotHit,
+    updatedProduct.shortDescription,
     JSON.stringify(updatedProduct.descriptionTitle),
     JSON.stringify(updatedProduct.descriptionText),
     JSON.stringify(updatedProduct.feature),
@@ -324,45 +333,78 @@ app.put("/product", (req, res) => {
   });
 });
 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     console.log("req.body:", req.body); // Добавьте этот вывод для отладки
-//     const { type, slug } = req.body;
+app.post("/product", (req, res) => {
+  const newProduct = req.body;
 
-//     if (!type || !slug) {
-//       return cb(new Error("Параметры type и slug обязательны"));
-//     }
+  if (!newProduct.title || !newProduct.slug) {
+    return res
+      .status(400)
+      .json({ detail: "Product title and slug are required" });
+  }
 
-//     const uploadPath = path.join(
-//       __dirname,
-//       "public",
-//       "data",
-//       "images",
-//       type,
-//       slug
-//     );
-//     fs.mkdirSync(uploadPath, { recursive: true });
-//     cb(null, uploadPath);
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname));
-//   },
-// });
+  const sql = `INSERT INTO product (
+    type, 
+    pagename, 
+    title, 
+    slug, 
+    article, 
+    price, 
+    saleprice, 
+    isSale, 
+    image, 
+    isHotHit, 
+    shortDescription, 
+    descriptionTitle, 
+    descriptionText, 
+    feature
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-// const upload = multer({ storage: storage }).fields([
-//   { name: "file", maxCount: 1 },
-//   { name: "type", maxCount: 1 },
-//   { name: "slug", maxCount: 1 },
-// ]);
+  const params = [
+    newProduct.type,
+    newProduct.pagename,
+    newProduct.title,
+    newProduct.slug,
+    newProduct.article,
+    newProduct.price,
+    newProduct.saleprice,
+    newProduct.isSale,
+    JSON.stringify(newProduct.image),
+    newProduct.isHotHit,
+    newProduct.shortDescription,
+    JSON.stringify(newProduct.descriptionTitle),
+    JSON.stringify(newProduct.descriptionText),
+    JSON.stringify(newProduct.feature),
+  ];
 
-// app.post("/upload", upload, (req, res) => {
-//   console.log("req.body:", req.body); // теперь req.body должен содержать type и slug
-//   console.log("req.files:", req.files); // req.files содержит загруженные файлы
-//   if (!req.body.type || !req.body.slug) {
-//     return res.status(400).send("Параметры type и slug обязательны");
-//   }
-//   res.status(200).send({ message: "File uploaded successfully" });
-// });
+  db.run(sql, params, function (err) {
+    if (err) {
+      console.error("Error inserting product:", err);
+      return res.status(500).json({ detail: "Error creating product" });
+    }
+
+    res.json({ detail: "Product created successfully", id: this.lastID });
+  });
+});
+
+app.delete("/product/:id", (req, res) => {
+  const productId = req.params.id;
+  console.log("Deleting product with ID:", productId); // Log to check the ID
+
+  const sql = `DELETE FROM product WHERE id = ?`;
+
+  db.run(sql, [productId], function (err) {
+    if (err) {
+      console.error("Error deleting product:", err);
+      return res.status(500).json({ detail: "Error deleting product" });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ detail: "Product not found" });
+    }
+
+    res.json({ detail: "Product deleted successfully" });
+  });
+});
 
 const PORT = 8050;
 app.listen(PORT, () => {

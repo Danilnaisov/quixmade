@@ -1,4 +1,4 @@
-import { endpoint } from "./config";
+import { endpoint } from "./config.js";
 
 // Функция для загрузки "горячих хитов"
 export const loadHothits = async (slice) => {
@@ -109,26 +109,18 @@ export const updateProduct = async (product) => {
   }
 };
 
-export const uploadImage = async (file, type, slug) => {
-  console.log("file = ", file);
-  console.log("type = ", type);
-  console.log("slug = ", slug);
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("type", type);
-  formData.append("slug", slug);
-  console.log("formData = ", formData);
+export const createProduct = async (productData) => {
   try {
-    const response = await fetch(`${endpoint}upload`, {
+    const response = await fetch(`${endpoint}product`, {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(productData),
     });
-    if (!response.ok) {
-      throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
-    }
-    return await response.json();
+    return response;
   } catch (error) {
-    console.error("Ошибка в uploadImage:", error);
+    console.error("Error while creating product:", error);
     throw error;
   }
 };

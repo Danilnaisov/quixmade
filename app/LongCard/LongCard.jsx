@@ -1,8 +1,35 @@
 import React from "react";
 import Link from "next/link";
 import Styles from "./LongCard.module.css";
+import { endpoint } from "../api/config";
 
 const LongCard = ({ product }) => {
+  const deleteProduct = async (id) => {
+    // Ask for confirmation before deletion
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
+
+    if (!confirmDelete) return; // If the user cancels, don't proceed
+
+    try {
+      const response = await fetch(`${endpoint}product/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete product");
+      }
+
+      // Optionally: Do something on successful deletion, like updating the UI or notifying the user
+      alert("Product deleted successfully");
+
+      // You can also add logic here to remove the deleted product from the UI or reload the page
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      alert("Failed to delete product");
+    }
+  };
   return (
     <div className={Styles.admin__item__block}>
       <div className={Styles.admin__item__block}>
@@ -12,9 +39,14 @@ const LongCard = ({ product }) => {
         >
           <div className={Styles.admin__item__image}>
             <img
-              src={product.image}
+              src={
+                product.image ? product.image[0] : "/data/images/notfound.png"
+              }
               alt=""
-              onError="this.onerror=null; this.src='../data/images/notfound.png';"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/data/images/notfound.png";
+              }}
             />
           </div>
           <div className={Styles.admin__item__text}>
@@ -27,7 +59,11 @@ const LongCard = ({ product }) => {
         <Link href={`/admin/${product.slug}`}>
           <img src="/img/svg/edit.svg" alt="" />
         </Link>
-        <img src="/img/svg/delete.svg" alt="" />
+        <img
+          src="/img/svg/delete.svg"
+          alt=""
+          onClick={() => deleteProduct(product.id)}
+        />
       </div>
     </div>
   );

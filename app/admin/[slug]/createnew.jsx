@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { Preloader } from "@/app/components/Preloader/Preloader";
+import { Notfound } from "@/app/components/Notfound/Notfound";
+import React, { useState } from "react";
+import PageTemplate from "@/app/components/PageTemplate";
+import Styles from "../AdminPannel.module.css";
+import { createProduct } from "@/app/api/api_utils"; // Мы будем использовать новую функцию для создания товара
+import Link from "next/link";
+import ProductDimensions from "@/app/components/ProductDimensions";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import PageTemplate from "@/app/components/PageTemplate";
-import Styles from "../admin/AdminPannel.module.css";
-import { createProduct } from "@/app/api/api_utils";
-import Link from "next/link";
 
 export default function CreateProductPage() {
   const [product, setProduct] = useState({
     type: "",
+    pagename: "",
     title: "",
     slug: "",
     article: "",
@@ -19,122 +23,104 @@ export default function CreateProductPage() {
     isSale: false,
     isHotHit: false,
     feature: {
-      construction: ["Формфактор", ""],
+      construction: ["Конструкция", ""],
       color: ["Цвет", ""],
-      switch: {
-        brand: "",
-        color: "",
-        type: "",
-      },
-      numblock: ["Нумблок", false],
-      layoutType: ["Раскладка", ""],
-      keyProfile: ["Профиль колпачков", ""],
-      keyMaterial: ["Материал колпачков", ""],
-      glideMaterial: ["Материал покрытия", ""],
+      switch: { brand: "", color: "", type: "" },
+      numblock: ["Номера", false],
+      layoutType: ["Тип компоновки", ""],
+      keyProfile: ["Профиль клавиш", ""],
+      keyMaterial: ["Материал клавиш", ""],
+      glideMaterial: ["Материал скольжения", ""],
       weight: ["Вес", ""],
       keyscount: ["Количество клавиш", ""],
       backlight: ["Подсветка", ""],
-      plugInCable: ["Отсоединяемый кабел", false],
-      cableType: ["Тип разъема", ""],
+      plugInCable: ["Подключение через кабель", false],
+      cableType: ["Тип кабеля", ""],
       cableLength: ["Длина кабеля", ""],
-      dimensions: ["Размеры (ДxШxВ)", ["", "", ""]],
       warranty: ["Гарантия", ""],
       connectType: ["Тип подключения", ""],
-      isWireless: ["Беспроводной режим", false],
-      batteryCapacity: ["Емкость аккумулятора", ""],
-      language: ["Тип раскладки", ""],
+      isWireless: ["Беспроводное", false],
+      batteryCapacity: ["Ёмкость аккумулятора", ""],
+      language: ["Язык", ""],
       brand: ["Бренд", ""],
-      status: ["Состояние", ""],
+      status: ["Статус", ""],
     },
     shortDescription: "",
     detailedDescription: "",
+    image: "",
   });
   const [imageFiles, setImageFiles] = useState([]);
-  const [dimensions, setDimensions] = useState(["", "", ""]);
-  const [detailedDescription, setDetailedDescription] = useState("");
+  const [preloaderVisible, setPreloaderVisible] = useState(false);
 
-  //   useEffect(() => {
-  //     async function fetchProduct() {
-  //       if (slug) {
-  //         const productData = await loadProductBySlug(slug);
-  //         setProduct(productData);
-  //         setDetailedDescription(formatDescription(productData));
-  //       }
-  //       setPreloaderVisible(false);
-  //     }
-  //     fetchProduct();
-  //   });
-
-  const handleDescriptionChange = (e) => {
-    const { value } = e.target;
-    setProduct((prevProduct) => ({
-      ...prevProduct,
-      detailedDescription: value,
-    }));
-  };
-
-  const saveDescription = async () => {
-    const updatedDescription = detailedDescription
-      .split("\n\n") // Split by double newlines
-      .map((item) => {
-        const cleanedItem = item.trim();
-
-        if (!cleanedItem) return null; // Skip if block is empty
-
-        const [title, ...rest] = cleanedItem.split("\n");
-        const text = rest.join("\n");
-
-        // Log the split content to check
-        console.log("Parsed item:", { title, text });
-
-        return {
-          title: title.trim(),
-          text: text.trim(),
-        };
-      })
-      .filter((item) => item !== null && (item.title || item.text)); // Filter out null and empty items
-
-    console.log("Updated description:", updatedDescription);
-
-    const updatedProduct = {
-      ...product,
-      descriptionTitle: updatedDescription.map((item) => item.title),
-      descriptionText: updatedDescription.map((item) => item.text),
-    };
-
-    console.log("Updated product:", updatedProduct);
-
-    try {
-      const response = await createProduct(updatedProduct);
-      if (!response.ok) {
-        throw new Error("Failed to save the product");
-      }
-      return updatedProduct;
-    } catch (error) {
-      console.error("Error while saving the product:", error);
-      throw error;
-    }
-  };
-
-  const handleDimensionChange = (e, index) => {
-    const newDimensions = [...dimensions];
-    newDimensions[index] = e.target.value;
-    setDimensions(newDimensions);
-    setProduct((prevProduct) => {
-      const updatedFeature = { ...prevProduct.feature };
-      updatedFeature.dimensions[1] = newDimensions;
-      return { ...prevProduct, feature: updatedFeature };
-    });
-  };
-
-  function handleFileInput(event) {
+  const handleFileInput = (event) => {
     const files = event.target.files;
     const images = [];
+
     for (let i = 0; i < files.length; i++) {
       images.push(files[i]);
     }
+
+    console.log("Изображения загружены:", images);
     setImageFiles(images);
-  }
+  };
+
+  const handleSave = async () => {
+    try {
+      if (!product.type || !product.slug) {
+        console.log("Не указаны все параметры:", product);
+        return;
+      }
+
+      if (imageFiles.length > 0) {
+        const formData = new FormData();
+        for (const file of imageFiles) {
+          formData.append("image", file);
+        }
+        formData.append("type", product.type);
+        formData.append("slug", product.slug);
+
+        const response = await fetch(
+          "https://api.made.quixoria.ru/image-upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        console.log("FormData type:", formData.get("type"));
+        console.log("FormData slug:", formData.get("slug"));
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.message) {
+            console.log("Изображения загружены:", data.message);
+            product.image = data.message;
+          } else {
+            console.error("Ответ сервера не содержит 'message'");
+            toast.error("Ошибка при загрузке изображений");
+            return;
+          }
+        } else {
+          console.error(
+            "Не удалось загрузить изображения, статус:",
+            response.status
+          );
+          toast.error("Ошибка при загрузке изображений");
+          return;
+        }
+      }
+
+      const response = await createProduct(product);
+      if (response.ok) {
+        toast.success("Товар успешно создан");
+      } else {
+        toast.error("Ошибка при создании товара");
+      }
+    } catch (error) {
+      console.error("Ошибка при создании товара:", error);
+      toast.error("Ошибка при создании товара");
+    }
+  };
 
   const handleInputChange = (e, field) => {
     const { value } = e.target;
@@ -180,65 +166,8 @@ export default function CreateProductPage() {
     });
   };
 
-  const handleSave = async () => {
-    try {
-      if (!product.type || !product.slug) {
-        toast.error("Не указаны все параметры!");
-        return;
-      }
-
-      const formData = new FormData();
-      if (imageFiles.length > 0) {
-        for (const file of imageFiles) {
-          formData.append("image", file);
-        }
-        formData.append("type", product.type);
-        formData.append("slug", product.slug);
-
-        const response = await fetch(
-          "https://api.made.quixoria.ru/image-upload",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.message) {
-            product.image = data.message;
-          } else {
-            toast.error("Ошибка при загрузке изображений");
-            return;
-          }
-        } else {
-          toast.error("Ошибка при загрузке изображений");
-          return;
-        }
-      }
-
-      console.log(await saveDescription());
-
-      const updatedProduct = await saveDescription();
-      console.log("Updated product:", updatedProduct); // Добавьте лог для отладки
-
-      setProduct(updatedProduct);
-
-      const response = await createProduct(updatedProduct);
-      console.log("Create product response:", response);
-      if (response.ok) {
-        toast.success("Товар успешно добавлен");
-      } else {
-        toast.error("Ошибка при добавлении товара");
-      }
-    } catch (error) {
-      toast.error("Ошибка при добавлении товара");
-      console.error("Error:", error);
-    }
-  };
-
   return (
-    <PageTemplate pagename="Создать товар">
+    <PageTemplate pagename="Создание товара">
       <ToastContainer />
       {product ? (
         <>
@@ -256,33 +185,47 @@ export default function CreateProductPage() {
             <div className={Styles.data__left}>
               <div className={Styles.item__data__row}>
                 <h3>Тип</h3>
-                <input onChange={(e) => handleInputChange(e, "type")} />
+                <input
+                  onChange={(e) => handleInputChange(e, "type")}
+                  value={product.type}
+                />
               </div>
               <div className={Styles.item__data__row}>
                 <h3>Название страницы</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "pagename")}
+                  value={product.pagename}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>Название</h3>
-                <input onChange={(e) => handleInputChange(e, "title")}></input>
+                <input
+                  onChange={(e) => handleInputChange(e, "title")}
+                  value={product.title}
+                ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>Slug</h3>
-                <input onChange={(e) => handleInputChange(e, "slug")}></input>
+                <input
+                  onChange={(e) => handleInputChange(e, "slug")}
+                  value={product.slug}
+                ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>Артикул</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "article")}
+                  value={product.article}
                 ></input>
               </div>
               <div
                 className={`${Styles.item__data__row} ${Styles.item__data__number}`}
               >
                 <h3>Цена</h3>
-                <input onChange={(e) => handleInputChange(e, "price")}></input>
+                <input
+                  onChange={(e) => handleInputChange(e, "price")}
+                  value={product.price}
+                ></input>
               </div>
               <div
                 className={`${Styles.item__data__row} ${Styles.item__data__number}`}
@@ -290,6 +233,7 @@ export default function CreateProductPage() {
                 <h3>Цена по скидке</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "saleprice")}
+                  value={product.saleprice ? product.saleprice : ""}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
@@ -318,30 +262,35 @@ export default function CreateProductPage() {
                 <h3>{product.feature.construction[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.construction")}
+                  value={product.feature.construction[1]}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>{product.feature.color[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.color")}
+                  value={product.feature.color[1]}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>Бренд переключателей</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.switch.brand")}
+                  value={product.feature.switch.brand}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>Цвет переключателей</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.switch.color")}
+                  value={product.feature.switch.color}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>Тип переключателей</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.switch.type")}
+                  value={product.feature.switch.type}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
@@ -360,6 +309,7 @@ export default function CreateProductPage() {
                 <h3>{product.feature.layoutType[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.layoutType")}
+                  value={product.feature.layoutType[1]}
                 ></input>
               </div>
               <div
@@ -368,6 +318,7 @@ export default function CreateProductPage() {
                 <h3>{product.feature.keyProfile[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.keyProfile")}
+                  value={product.feature.keyProfile[1]}
                 ></input>
               </div>
               <div
@@ -376,6 +327,7 @@ export default function CreateProductPage() {
                 <h3>{product.feature.keyMaterial[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.keyMaterial")}
+                  value={product.feature.keyMaterial[1]}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
@@ -384,6 +336,7 @@ export default function CreateProductPage() {
                   onChange={(e) =>
                     handleInputChange(e, "feature.glideMaterial")
                   }
+                  value={product.feature.glideMaterial[1]}
                 ></input>
               </div>
               <div
@@ -392,6 +345,7 @@ export default function CreateProductPage() {
                 <h3>{product.feature.weight[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.weight")}
+                  value={product.feature.weight[1]}
                 ></input>
               </div>
               <div
@@ -400,6 +354,7 @@ export default function CreateProductPage() {
                 <h3>{product.feature.keyscount[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.keyscount")}
+                  value={product.feature.keyscount[1]}
                 ></input>
               </div>
               <div
@@ -408,6 +363,7 @@ export default function CreateProductPage() {
                 <h3>{product.feature.backlight[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.backlight")}
+                  value={product.feature.backlight[1]}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
@@ -426,6 +382,7 @@ export default function CreateProductPage() {
                 <h3>{product.feature.cableType[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.cableType")}
+                  value={product.feature.cableType[1]}
                 ></input>
               </div>
             </div>
@@ -447,8 +404,8 @@ export default function CreateProductPage() {
               >
                 <h3>Краткое описание</h3>
                 <textarea
-                  value={product.shortDescription}
                   onChange={(e) => handleInputChange(e, "shortDescription")}
+                  value={product.shortDescription}
                 />
               </div>
               <div
@@ -456,7 +413,7 @@ export default function CreateProductPage() {
               >
                 <h3>Подробное описание</h3>
                 <textarea
-                  value={product.detailedDescription}
+                  value={detailedDescription}
                   onChange={handleDescriptionChange}
                   rows={10}
                 />
@@ -467,18 +424,11 @@ export default function CreateProductPage() {
                 <h3>{product.feature.cableLength[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.cableLength")}
+                  value={product.feature.cableLength[1]}
                 ></input>
               </div>
-              <div
-                className={`${Styles.item__data__row} ${Styles.item__data__number}`}
-              >
-                <h3>{product.feature.dimensions[0]}</h3>
-                {dimensions.map((dimension, index) => (
-                  <input
-                    key={index}
-                    onChange={(e) => handleDimensionChange(e, index)}
-                  />
-                ))}
+              <div className={Styles.item__data__row}>
+                <ProductDimensions product={product} setProduct={setProduct} />
               </div>
               <div
                 className={`${Styles.item__data__row} ${Styles.item__data__number}`}
@@ -486,12 +436,14 @@ export default function CreateProductPage() {
                 <h3>{product.feature.warranty[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.warranty")}
+                  value={product.feature.warranty[1]}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>{product.feature.connectType[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.connectType")}
+                  value={product.feature.connectType[1]}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
@@ -514,18 +466,21 @@ export default function CreateProductPage() {
                   onChange={(e) =>
                     handleInputChange(e, "feature.batteryCapacity")
                   }
+                  value={product.feature.batteryCapacity[1]}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>{product.feature.language[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.language")}
+                  value={product.feature.language[1]}
                 ></input>
               </div>
               <div className={Styles.item__data__row}>
                 <h3>{product.feature.brand[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.brand")}
+                  value={product.feature.brand[1]}
                 ></input>
               </div>
               <div
@@ -534,6 +489,7 @@ export default function CreateProductPage() {
                 <h3>{product.feature.status[0]}</h3>
                 <input
                   onChange={(e) => handleInputChange(e, "feature.status")}
+                  value={product.feature.status[1]}
                 ></input>
               </div>
               <div className={Styles.item__save}>
