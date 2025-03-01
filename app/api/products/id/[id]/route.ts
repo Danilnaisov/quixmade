@@ -102,7 +102,7 @@ export async function PUT(
     const categoryId = body.category_id ? new ObjectId(body.category_id) : null;
 
     // Валидация данных
-    if (!body || !body.name || !body.price) {
+    if (!body.name || !body.price) {
       return new Response(
         JSON.stringify({ error: "Недостаточно данных для обновления товара" }),
         { status: 400 }
