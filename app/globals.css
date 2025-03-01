@@ -1,217 +1,84 @@
-* {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  text-decoration: none;
-  box-sizing: border-box;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  /* text-wrap: nowrap; */
-  /* border: 1px red solid; */
-}
-a {
-  color: inherit;
-  text-decoration: none;
-}
-header a {
-  text-decoration: none;
-  color: #f9f8f8;
-}
-@font-face {
-  font-family: Montserrat;
-  src: url("fonts/Montserrat.ttf");
-}
-@font-face {
-  font-family: Montserrat-Black;
-  src: url("fonts/MontserratAlternates-Black.ttf");
-}
-@font-face {
-  font-family: Montserrat-Bold;
-  src: url("fonts/MontserratAlternates-Bold.ttf");
-}
-@font-face {
-  font-family: Montserrat-SemiBold;
-  src: url("fonts/MontserratAlternates-SemiBold.ttf");
-}
-li:hover {
-  cursor: pointer;
-}
-html,
 body {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: #f9f8f8;
-  font-family: Montserrat;
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-img {
-  user-select: none;
-  -webkit-user-drag: none;
-  -moz-user-drag: none;
-  -ms-user-drag: none;
-  user-drag: none;
-}
-.waves,
-.flip-waves {
-  width: 100%;
-  height: 100px;
-}
-.waves img {
-  width: 100vw;
-}
-.flip-waves img {
-  width: 100vw;
-}
-.flip-waves {
-  transform: scaleY(-1);
-}
-.wave__header {
-  width: 100%;
-  height: 320px;
-  color: #274c5b;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.wave__header h1 {
-  font-size: 64px;
-  margin-bottom: 120px;
-  font-weight: 800;
-}
-.card__list {
-  text-align: start;
-  user-select: none;
-  display: flex;
-  flex-direction: row;
-  width: 100vw;
-  height: 600px;
-  gap: 40px;
-  /* flex-wrap: wrap; */
-  scroll-behavior: smooth;
-  color: #274c5b;
-  justify-content: center;
-}
-.card {
-  cursor: pointer;
-  background: #fff;
-  max-width: 400px;
-  max-height: 500px;
-  border-radius: 40px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease, transform 0.3s ease-in-out;
-  display: flex;
-  flex-direction: column;
-  justify-content: start;
-  align-items: start;
-  gap: 15px;
-  padding: 10px;
-}
-.card:hover {
-  box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.15);
-  transform: scale(1.05);
-}
-.little__card {
-  cursor: pointer;
-  max-width: 400px;
-  max-height: 310px;
-  border-radius: 40px;
-  transition: transform 0.3s ease-in-out;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 10px;
-}
-.little__card:hover {
-  transform: scale(1.05);
-}
-.card__image {
-  min-width: 380px;
-  min-height: 380px;
-  width: 380px;
-  height: 380px;
-  gap: 15px;
-  padding: 10px;
-}
-.item__c {
-  width: 100%;
-  height: 36px;
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-}
-.item__c_block {
-  height: auto;
-  border-radius: 15px;
-  padding: 10px;
-  font-size: 16px;
-  font-weight: 500;
-  text-align: center;
-  width: auto;
-}
-.item__sale {
-  background: #efd372;
-  color: #274c5b;
-}
-.item__wireless {
-  background: #274c5b;
-  color: #f5f5f5;
-}
-.item__notinstock {
-  background: #f5f5f5;
-  color: #274c5b;
-}
-.card__text {
-  padding: 5px 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 380px;
-  height: 85px;
-}
-.card__text h4 {
-  font-size: 24px;
-  width: 100%;
-  height: 24px;
-  font-family: Montserrat-Bold;
-}
-.card__text hr {
-  border: 1px solid #bbbbbb;
-  width: 100%;
-}
-.card__text__about {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-content: center;
-  width: 100%;
-  height: 20px;
-}
-.text__left {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-}
-.text__left p,
-span {
-  font-size: 16px;
-  font-weight: 600;
-  height: 50px;
-  font-family: Montserrat;
-  color: #274c5b;
-}
-.text__left span {
-  color: #bbbbbb;
-  text-decoration: line-through;
-}
-.text__right {
-  height: 100%;
-  align-content: center;
+  font-family: Inter, Montserrat, sans-serif;
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
