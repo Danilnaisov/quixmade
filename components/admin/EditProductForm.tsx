@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Minus, Plus, Trash2 } from "lucide-react";
+import { ObjectId } from "mongodb";
 
 interface Feature {
   label: string;
@@ -28,17 +30,28 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
   // Убедитесь, что features всегда является массивом
   const [formData, setFormData] = useState({
     _id: product._id || "",
-    category:
+    category_id:
       typeof product.category === "object"
         ? product.category?._id || ""
-        : product.category || "",
+        : product.category_id || "",
     slug: product.slug || "",
     sku: product.sku || "",
     name: product.name || "",
     price: product.price || 0,
     short_description: product.short_description || "",
     description: product.description || "",
-    features: Array.isArray(product.features) ? product.features : [],
+    features: Array.isArray(product.features)
+      ? product.features
+      : Object.entries(product.features || {}).map(([key, value]) => ({
+          label: key,
+          value: value,
+          type:
+            typeof value === "boolean"
+              ? "bool"
+              : typeof value === "number"
+              ? "int"
+              : "string",
+        })),
     images: product.images || [],
     stock_quantity: product.stock_quantity || 0,
     isDiscount: product.isDiscount || false,
@@ -77,7 +90,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
 
       const updatedProduct = {
         ...formData,
-        category_id: formData.category, // Переименовываем category в category_id
+        category_id: formData.category_id, // Используем category_id
         features: formattedFeatures,
       };
 
@@ -88,7 +101,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
         const { _id, ...productData } = updatedProduct;
 
         // Обновление существующего товара
-        response = await fetch(`/api/products/id/${updatedProduct._id}`, {
+        response = await fetch(`/api/products/id${updatedProduct._id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -97,12 +110,14 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
         });
       } else {
         // Добавление нового товара
+        const { _id, ...newProductData } = updatedProduct; // Исключаем _id, если он пустой
+
         response = await fetch("/api/products/id", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(updatedProduct),
+          body: JSON.stringify(newProductData),
         });
 
         // Получаем сгенерированный _id из ответа сервера
@@ -132,9 +147,9 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
       <form className="space-y-4 mt-4">
         {/* Выпадающий список категорий */}
         <select
-          value={formData.category._id}
+          value={formData.category_id}
           onChange={(e) =>
-            setFormData({ ...formData, category: e.target.value })
+            setFormData({ ...formData, category_id: e.target.value })
           }
           className="w-full p-2 border rounded"
         >
