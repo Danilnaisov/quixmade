@@ -45,22 +45,22 @@ const accessories: { title: string; href: string; description: string }[] = [
   },
   {
     title: "Ковры",
-    href: "/catalog/accessories/carpet",
+    href: "/catalog/pads",
     description: "Игровые и офисные коврики для мыши.",
   },
   {
     title: "Кабели",
-    href: "/catalog/accessories/cable",
+    href: "/catalog/cable",
     description: "USB-кабели для подключения устройств.",
   },
   {
     title: "Клавиши",
-    href: "/catalog/accessories/keycaps",
+    href: "/catalog/keycaps",
     description: "Сменные клавишные колпачки.",
   },
   {
     title: "Подставки",
-    href: "/catalog/accessories/stand",
+    href: "/catalog/stand",
     description: "Подставки обеспечивающие комфорт при длительной работе.",
   },
 ];

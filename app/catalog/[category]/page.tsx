@@ -41,7 +41,7 @@ export default async function CategoryPage({
         {/* Вывод товаров категории */}
         <Container className="pb-14 flex justify-between w-full">
           {products && products.length > 0 ? (
-            <CardList count={products.length} category={cat} />
+            <CardList count={products.length} category={cat.name} />
           ) : (
             <p>В данной категории пока нет товаров.</p>
           )}

@@ -101,7 +101,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
         const { _id, ...productData } = updatedProduct;
 
         // Обновление существующего товара
-        response = await fetch(`/api/products/id${updatedProduct._id}`, {
+        response = await fetch(`/api/products/id/${updatedProduct._id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
