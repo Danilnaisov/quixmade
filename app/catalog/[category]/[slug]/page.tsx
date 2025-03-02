@@ -46,10 +46,10 @@ export default async function ProductPage({
   }
 
   return (
-    <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen">
+    <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen gap-4">
       <Header />
       <Container className="mt-[15px] w-full flex flex-col gap-[15px] items-center">
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-3">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -132,13 +132,13 @@ export default async function ProductPage({
           </div>
         </div>
       </Container>
-      <Container className="bg-[#F9F8F8] rounded-[40px] p-10">
+      <Container className="bg-[#F9F8F8] rounded-[40px] p-10 w-full">
         <Title text="Описание" className="text-[32px] font-bold" />
         {product.description.split("\n").map((line, index) => (
           <p key={index}>{line}</p>
         ))}
       </Container>
-      <Container className="bg-[#F9F8F8] rounded-[40px] p-10">
+      <Container className="bg-[#F9F8F8] rounded-[40px] p-10 w-full">
         <Title text="Отзывы" className="text-[32px] font-bold" />
         <p></p>
       </Container>

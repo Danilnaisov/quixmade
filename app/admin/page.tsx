@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/admin/ProductCard";
 import { EditProductForm } from "@/components/admin/EditProductForm";
+import { Title } from "@/components/shared";
 
 interface Category {
   _id: string;
@@ -142,7 +143,7 @@ const AdminPage = () => {
           onCancel={() => setEditingProduct(null)}
         />
       )}
-
+      <Title text="Список товаров" className="mt-3" />
       {/* Список товаров */}
       {!editingProduct && (
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
@@ -169,6 +170,7 @@ const AdminPage = () => {
           ))}
         </div>
       )}
+      <Title text="Список пользователей" className="mt-3" />
     </div>
   );
 };
