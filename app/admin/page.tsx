@@ -16,7 +16,6 @@ interface Product {
   _id: string;
   category: string | { _id: string; ru_name: string };
   slug: string;
-  sku: string;
   name: string;
   price: number;
   short_description: string;
@@ -92,7 +91,6 @@ const AdminPage = () => {
       _id: "",
       category: "",
       slug: "",
-      sku: "",
       name: "",
       price: 0,
       short_description: "",

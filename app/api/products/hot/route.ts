@@ -20,7 +20,11 @@ export async function GET() {
       return {
         ...product,
         category: category
-          ? { name: category.name, name_ru: category.name_ru }
+          ? {
+              _id: category._id,
+              name: category.name,
+              name_ru: category.name_ru,
+            }
           : null,
       };
     });

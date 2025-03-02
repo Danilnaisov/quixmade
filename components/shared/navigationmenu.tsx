@@ -39,11 +39,6 @@ const catalog: { title: string; href: string; description: string }[] = [
 
 const accessories: { title: string; href: string; description: string }[] = [
   {
-    title: "Все товары",
-    href: "/catalog/accessories",
-    description: "Аксессуары для ваших девайсов.",
-  },
-  {
     title: "Ковры",
     href: "/catalog/pads",
     description: "Игровые и офисные коврики для мыши.",

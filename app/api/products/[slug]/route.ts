@@ -56,7 +56,6 @@ export async function GET(
     return NextResponse.json({
       id: product._id.toString(),
       slug: product.slug,
-      sku: product.sku,
       name: product.name,
       price: product.price,
       short_description: product.short_description,
@@ -64,8 +63,8 @@ export async function GET(
       features: product.features || {},
       images: product.images || [],
       stock_quantity: product.stock_quantity || 0,
-      isDiscount: product.is_discount || false,
-      discountedPrice: product.discounted_price,
+      isDiscount: product.isDiscount || false,
+      discountedPrice: product.discountedPrice,
       isHotHit: product.isHotHit,
       category: category
         ? {

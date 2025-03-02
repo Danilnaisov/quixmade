@@ -83,7 +83,6 @@ export default async function ProductPage({
             </div>
             <div className="flex flex-col w-[710px]">
               <h1>{product.name}</h1>
-              <p>{product.sku}</p>
               <p>Отзывы</p>
               <p>Описание</p>
               <p>{product.short_description}</p>
@@ -95,13 +94,16 @@ export default async function ProductPage({
                   <h2 className="line-through text-[13px] font-[700] text-[#274C5B]">
                     {product.price} ₽
                   </h2>
+                  <p>Или {product.discountedPrice / 4} ₽ × 4 платежа в сплит</p>
                 </>
               ) : (
-                <h2 className="text-[18px] font-[700] text-[#F20D0D]">
-                  {product.price} ₽
-                </h2>
+                <>
+                  <h2 className="text-[18px] font-[700] text-[#F20D0D]">
+                    {product.price} ₽
+                  </h2>
+                  <p>Или {product.price / 4} ₽ × 4 платежа в сплит</p>
+                </>
               )}
-              <p>Или {product.price / 4} ₽ × 4 платежа в сплит</p>
               {/* Кнопка "Добавить в корзину" */}
               {product.stock_quantity >= 2 && product.stock_quantity <= 4 ? (
                 <div className="flex gap-2 items-center">

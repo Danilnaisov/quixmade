@@ -58,7 +58,6 @@ export async function GET(
     return NextResponse.json({
       id: product._id.toString(),
       slug: product.slug,
-      sku: product.sku,
       name: product.name,
       price: product.price,
       short_description: product.short_description,

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 
-export async function GET(request: Request, { params }: { params: { category: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: { category: string } }
+) {
   try {
     const { category } = params;
 
@@ -10,7 +13,9 @@ export async function GET(request: Request, { params }: { params: { category: st
     const db = client.db("quixmade");
 
     // Ищем категорию по имени (поле name)
-    const categoryDoc = await db.collection("categories").findOne({ name: category });
+    const categoryDoc = await db
+      .collection("categories")
+      .findOne({ name: category });
 
     if (!categoryDoc) {
       return NextResponse.json(
@@ -20,7 +25,8 @@ export async function GET(request: Request, { params }: { params: { category: st
     }
 
     // Ищем товары, принадлежащие этой категории (по category_id)
-    const products = await db.collection("products")
+    const products = await db
+      .collection("products")
       .find({ category_id: categoryDoc._id })
       .toArray();
 
@@ -32,6 +38,7 @@ export async function GET(request: Request, { params }: { params: { category: st
       price: product.price,
       short_description: product.short_description,
       images: product.images || [],
+      features: product.features || [],
       stock_quantity: product.stock_quantity || 0,
       isDiscount: product.is_discount || false,
       discountedPrice: product.discounted_price,

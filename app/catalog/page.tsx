@@ -19,8 +19,7 @@ export default async function Home() {
       <Header />
       <Banner count={5} pageName="Каталог" />
       <Container className="pb-14 flex justify-between w-full">
-        <Filters />
-        <CardList count={4} />
+        <CardList count={50} />
       </Container>
       <Footer />
     </div>

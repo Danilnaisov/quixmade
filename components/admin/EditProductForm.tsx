@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus, Trash2 } from "lucide-react";
 
 interface Feature {
   label: string;
@@ -15,7 +14,7 @@ interface Category {
 
 interface EditProductFormProps {
   product: any;
-  categories: Category[]; // Список категорий
+  categories: Category[];
   onSave: (updatedProduct: any) => void;
   onCancel: () => void;
 }
@@ -26,7 +25,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
   onSave,
   onCancel,
 }) => {
-  // Убедитесь, что features и images всегда являются массивами
   const [formData, setFormData] = useState({
     _id: product._id || "",
     category_id:
@@ -34,7 +32,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
         ? product.category?._id || ""
         : product.category_id || "",
     slug: product.slug || "",
-    sku: product.sku || "",
     name: product.name || "",
     price: product.price || 0,
     short_description: product.short_description || "",
@@ -51,7 +48,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
               ? "int"
               : "string",
         })),
-    images: Array.isArray(product.images) ? product.images : [], // Преобразуем в массив
+    images: Array.isArray(product.images) ? product.images : [],
     stock_quantity: product.stock_quantity || 0,
     isDiscount: product.isDiscount || false,
     discountedPrice: product.discountedPrice || 0,
@@ -183,13 +180,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
           placeholder="Slug"
           value={formData.slug}
           onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="SKU"
-          value={formData.sku}
-          onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
           className="w-full p-2 border rounded"
         />
         <input
