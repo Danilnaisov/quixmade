@@ -37,7 +37,10 @@ export const CardList: React.FC<Props> = ({
         if (type === "hot") {
           data = await getHotProducts();
         }
-        let filteredProducts = data;
+
+        const shuffledProducts = [...data].sort(() => Math.random() - 0.5);
+
+        let filteredProducts = shuffledProducts;
 
         // Ограничение количества товаров (если указано)
         if (count > 0) {
@@ -97,7 +100,7 @@ export const CardList: React.FC<Props> = ({
 
     // Рендерим карточки товаров
     return products.map((product) => (
-      <Card key={product.id} product={product} />
+      <Card key={product._id} product={product} />
     ));
   };
 

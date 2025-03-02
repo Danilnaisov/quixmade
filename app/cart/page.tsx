@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { CartItem } from "@/components/shared/CartItem";
 import { CartSummary } from "@/components/shared/CartSummary";
 import { Container, Footer, Header, Title } from "@/components/shared";
+import { toast } from "sonner";
 
 interface CartItemData {
   product_id: string;
@@ -61,7 +62,14 @@ const CartPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.error || "Ошибка при обновлении количества товара");
+
+        toast(errorData.error || "Ошибка при обновлении количества товара", {
+          action: {
+            label: "Ок",
+            onClick: () => console.log(),
+          },
+        });
+        // alert(errorData.error || "Ошибка при обновлении количества товара");
         return;
       }
 
@@ -101,7 +109,15 @@ const CartPage = () => {
       });
     } catch (error) {
       console.error("Ошибка при обновлении количества товара:", error);
-      alert("Произошла ошибка при обновлении количества товара");
+
+      toast("Ошибка при обновлении количества товара", {
+        action: {
+          label: "Ок",
+          onClick: () => console.log(),
+        },
+      });
+
+      // alert("Произошла ошибка при обновлении количества товара");
     }
   };
 
@@ -120,11 +136,17 @@ const CartPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.error || "Ошибка при удалении товара из корзины");
+
+        toast(errorData.error || "Ошибка при удалении товара из корзины", {
+          action: {
+            label: "Ок",
+            onClick: () => console.log(),
+          },
+        });
+        // alert(errorData.error || "Ошибка при удалении товара из корзины");
         return;
       }
 
-      // Обновляем состояние корзины локально
       setCart((prevCart) => {
         if (!prevCart) return null;
 
@@ -151,7 +173,13 @@ const CartPage = () => {
       });
     } catch (error) {
       console.error("Ошибка при удалении товара из корзины:", error);
-      alert("Произошла ошибка при удалении товара из корзины");
+      toast("Произошла ошибка при удалении товара из корзины", {
+        action: {
+          label: "Ок",
+          onClick: () => console.log(),
+        },
+      });
+      // alert("Произошла ошибка при удалении товара из корзины");
     }
   };
 
@@ -167,11 +195,24 @@ const CartPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.error || "Ошибка при оформлении заказа");
+        // alert(errorData.error || "Ошибка при оформлении заказа");
+        toast(errorData.error || "Ошибка при оформлении заказа", {
+          action: {
+            label: "Ок",
+            onClick: () => console.log(),
+          },
+        });
         return;
       }
 
-      alert("Заказ успешно оформлен!");
+      toast("Заказ успешно оформлен!", {
+        action: {
+          label: "Ок",
+          onClick: () => console.log(),
+        },
+      });
+
+      // alert("Заказ успешно оформлен!");
       // После успешного оформления заказа очищаем корзину
       setCart((prevCart) => ({
         ...prevCart!,
@@ -182,7 +223,13 @@ const CartPage = () => {
       }));
     } catch (error) {
       console.error("Ошибка при оформлении заказа:", error);
-      alert("Произошла ошибка при оформлении заказа");
+      toast("Произошла ошибка при оформлении заказа", {
+        action: {
+          label: "Ок",
+          onClick: () => console.log(),
+        },
+      });
+      // alert("Произошла ошибка при оформлении заказа");
     }
   };
 
@@ -198,12 +245,24 @@ const CartPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.error || "Ошибка при очистке корзины");
+        // alert(errorData.error || "Ошибка при очистке корзины");
+        toast(errorData.error || "Ошибка при очистке корзины", {
+          action: {
+            label: "Ок",
+            onClick: () => console.log(),
+          },
+        });
         return;
       }
 
-      alert("Корзина успешно очищена!");
-      // После успешной очистки обновляем состояние корзины
+      toast("Корзина успешно очищена!", {
+        action: {
+          label: "Ок",
+          onClick: () => console.log(),
+        },
+      });
+      // alert("Корзина успешно очищена!");
+
       setCart((prevCart) => ({
         ...prevCart!,
         items: [],
@@ -213,7 +272,13 @@ const CartPage = () => {
       }));
     } catch (error) {
       console.error("Ошибка при очистке корзины:", error);
-      alert("Произошла ошибка при очистке корзины");
+      toast("Произошла ошибка при очистке корзины", {
+        action: {
+          label: "Ок",
+          onClick: () => console.log(),
+        },
+      });
+      // alert("Произошла ошибка при очистке корзины");
     }
   };
 

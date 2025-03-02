@@ -1,9 +1,11 @@
 "use client";
 
 import { Minus, Plus, Trash2 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
+import Link from "next/link";
+import { toast } from "sonner";
 
 interface CartItemProps {
   item: {
@@ -29,48 +31,59 @@ export const CartItem: React.FC<CartItemProps> = ({
   onRemove,
   isDisabled,
 }) => {
-  if (item.stock_quantity === 0) {
-    alert(
+  const [isNotificationShown, setIsNotificationShown] = useState(false);
+
+  if (item.stock_quantity === 0 && !isNotificationShown) {
+    // alert(
+    //   `Товар "${item.name}" больше не доступен. Он будет удален из корзины.`
+    // );
+    toast(
       `Товар "${item.name}" больше не доступен. Он будет удален из корзины.`
     );
+    setIsNotificationShown(true);
     onRemove();
     return null;
-  } else if (item.quantity > item.stock_quantity) {
-    alert(
+  } else if (item.quantity > item.stock_quantity && !isNotificationShown) {
+    // alert(
+    //   `Превышено доступное количество товара "${item.name}". Товар будет удален из корзины.`
+    // );
+    toast(
       `Превышено доступное количество товара "${item.name}". Товар будет удален из корзины.`
     );
+    setIsNotificationShown(true);
     onRemove();
     return null;
   }
 
   return (
-    <li className="flex items-center bg-white p-[10px] w-full rounded-[10px] h-[144px] gap-4">
-      {/* Картинка */}
-      <div className="rounded-[10px] overflow-hidden">
-        {item.images && item.images.length > 0 ? (
-          <img
-            src={item.images[1]}
-            alt={item.name}
-            className="w-[124px] h-[124px] object-cover"
-          />
-        ) : (
-          <Skeleton className="w-[124px] h-[124px]"></Skeleton>
-        )}
-      </div>
-
-      {/* Информация о товаре */}
-      <div className="flex-1">
-        <p className="font-bold">{item.name}</p>
-        <p className="text-lg text-gray-700">
-          {item.price} ₽
-          {item.savings > 0 && (
-            <span className="text-green-500 ml-2">
-              Выгода: {item.savings} ₽
-            </span>
+    <li className="flex items-center bg-white p-[10px] w-full rounded-[10px] h-[144px] justify-between">
+      <Link href={item.link} className="flex items-center gap-4 w-max">
+        {/* Картинка */}
+        <div className="rounded-[10px] overflow-hidden">
+          {item.image && item.image.length > 0 ? (
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-[124px] h-[124px] object-cover"
+            />
+          ) : (
+            <Skeleton className="w-[124px] h-[124px]"></Skeleton>
           )}
-        </p>
-      </div>
+        </div>
 
+        {/* Информация о товаре */}
+        <div className="flex-1">
+          <p className="font-bold">{item.name}</p>
+          <p className="text-lg text-gray-700">
+            {item.price} ₽
+            {item.savings > 0 && (
+              <span className="text-green-500 ml-2">
+                Выгода: {item.savings} ₽
+              </span>
+            )}
+          </p>
+        </div>
+      </Link>
       {/* Счетчик и кнопки */}
       <div className="flex items-center gap-2">
         {/* Кнопка "-" */}

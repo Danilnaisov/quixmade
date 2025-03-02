@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -38,7 +38,13 @@ const UserPage = () => {
       <Button onClick={() => router.push("/order")}>Заказы</Button>
       <br />
       <br />
-      <Button onClick={() => router.push("/api/auth/signout")}>Выйти</Button>
+      <Button
+        onClick={async () => {
+          await signOut({ callbackUrl: "/" });
+        }}
+      >
+        Выйти
+      </Button>
     </div>
   );
 };

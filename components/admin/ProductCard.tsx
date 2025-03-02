@@ -1,5 +1,15 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
 
 interface ProductCardProps {
   product: {
@@ -17,7 +27,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onDelete,
 }) => {
   return (
-    <div className="border rounded-lg overflow-hidden shadow-md">
+    <div className="border rounded-lg overflow-hidden shadow-md ">
       {/* Изображение */}
       <img
         src={product.images[0] || "/default-image.jpg"}
@@ -30,9 +40,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <h3 className="font-bold">{product.name}</h3>
         <div className="flex justify-between mt-4">
           <Button onClick={onEdit}>Редактировать</Button>
-          <Button variant="destructive" onClick={onDelete}>
-            Удалить
-          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">Удалить</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Это действие удалит товар. Вы не сможете отменить это
+                  действие.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Отмена</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={onDelete}
+                  className="bg-red-500 hover:bg-red-400"
+                >
+                  Удалить
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

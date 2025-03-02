@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import React from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { toast } from "sonner";
 
 interface Props {
   className?: string;
@@ -26,10 +27,7 @@ export const Footer: React.FC<Props> = ({ className }) => {
             type="email"
             placeholder="Введите e-mail"
           />
-          <Button
-            className="bg-[#0889e5] text-[20px] font-extrabold rounded-[20px] h-[50px] hover:bg-[#1b547c]"
-            type="submit"
-          >
+          <Button className="bg-[#0889e5] text-[20px] font-extrabold rounded-[20px] h-[50px] hover:bg-[#1b547c]">
             Подписаться
           </Button>
         </div>

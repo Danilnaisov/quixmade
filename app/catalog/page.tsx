@@ -4,7 +4,6 @@ import {
   Container,
   Footer,
   Header,
-  Filters,
 } from "@/components/shared";
 import type { Metadata } from "next";
 
@@ -19,7 +18,7 @@ export default async function Home() {
       <Header />
       <Banner count={5} pageName="Каталог" />
       <Container className="pb-14 flex justify-between w-full">
-        <CardList count={50} />
+        <CardList />
       </Container>
       <Footer />
     </div>

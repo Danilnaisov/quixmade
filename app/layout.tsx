@@ -3,7 +3,9 @@
 import { Montserrat, Inter, Montserrat_Alternates } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
 
+// Font configurations
 const Font_Montserrat = Montserrat({
   variable: "--font-Montserrat",
   subsets: ["cyrillic"],
@@ -28,9 +30,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${Font_Montserrat.variable} ${Font_Inter.variable} ${MontserratAlternates.variable} antialiased bg-[#ffffff] `}
+        className={`${Font_Montserrat.variable} ${Font_Inter.variable} ${MontserratAlternates.variable} antialiased bg-white dark:bg-gray-900`}
       >
         <SessionProvider>{children}</SessionProvider>
+        
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

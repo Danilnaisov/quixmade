@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 
 interface Props {
   className?: string;
@@ -65,13 +66,35 @@ export const LoginPage: React.FC<Props> = ({ className }) => {
 
       if (!response.ok) {
         setError(data.error || "Ошибка при регистрации");
+        toast("Ошибка при регистрации");
       } else {
         setError(null);
-        alert("Регистрация успешна! Теперь вы можете войти.");
+        toast("Регистрация успешна! Выполняется вход...");
+
+        // Автоматическая авторизация после успешной регистрации
+        const signInResponse = await signIn("credentials", {
+          login: registerData.login,
+          password: registerData.password,
+          redirect: false,
+        });
+
+        if (signInResponse?.ok) {
+          console.log("Авторизация выполнена автоматически");
+          router.push("/");
+        } else {
+          console.error(
+            "Ошибка при автоматической авторизации:",
+            signInResponse?.error
+          );
+          setError(
+            signInResponse?.error || "Ошибка при автоматической авторизации"
+          );
+        }
       }
     } catch (error) {
       console.error("Ошибка при регистрации:", error);
       setError("Произошла ошибка при регистрации");
+      toast("Произошла ошибка при регистрации");
     }
   };
 

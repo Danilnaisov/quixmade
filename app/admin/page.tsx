@@ -108,12 +108,14 @@ const AdminPage = () => {
     <div className="p-8">
       <Button onClick={() => router.push("/")}>На главную</Button>
       <h1 className="text-2xl font-bold">Админ-панель</h1>
-      <p>Добро пожаловать, {session.user.login}!</p>
+      <p>{session.user?.email}</p>
 
       {/* Кнопка добавления товара */}
-      <Button onClick={handleAddProduct} className="mt-4">
-        Добавить товар
-      </Button>
+      {!editingProduct && (
+        <Button onClick={handleAddProduct} className="mt-4">
+          Добавить товар
+        </Button>
+      )}
 
       {/* Форма редактирования */}
       {editingProduct && (
@@ -143,7 +145,7 @@ const AdminPage = () => {
 
       {/* Список товаров */}
       {!editingProduct && (
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {products.map((product) => (
             <ProductCard
               key={product._id}

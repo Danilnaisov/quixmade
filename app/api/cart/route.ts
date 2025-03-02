@@ -59,10 +59,15 @@ export async function GET(request: Request) {
       .find({ _id: { $in: productIds.map((id) => new ObjectId(id)) } })
       .toArray();
 
+    const categories = await db.collection("categories").find({}).toArray();
+
     // Обновляем информацию о товарах в корзине
     const updatedItems = cart.items.map((item) => {
       const product = products.find(
         (p) => p._id.toString() === item.product_id
+      );
+      const category = categories.find((cat) =>
+        cat._id.equals(product.category_id)
       );
       const fullPrice = product?.price || 0;
       const discountedPrice = product?.isDiscount
@@ -71,14 +76,17 @@ export async function GET(request: Request) {
       const savings = product?.isDiscount
         ? (fullPrice - discountedPrice) * item.quantity
         : 0;
-
+      const image = product?.images[0];
+      const path = `catalog/${category.name}/${product?.slug}`;
       return {
         ...item,
         name: product?.name || "Товар не найден",
         price: discountedPrice,
         fullPrice: fullPrice,
+        image: image,
+        link: path,
         stock_quantity: product?.stock_quantity || 0,
-        savings: savings, // Выгода для товара
+        savings: savings,
       };
     });
 
