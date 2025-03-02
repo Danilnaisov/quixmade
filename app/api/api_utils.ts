@@ -32,6 +32,24 @@ export async function getProductBySlug(slug: string) {
   }
 }
 
+export async function getHotProducts() {
+  try {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/products/hot`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(
+        errorData.error || "Failed to fetch products by category"
+      );
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Ошибка при получении товаров:", error);
+    return null;
+  }
+}
+
 export async function getProductsByCategory(category: string) {
   try {
     // Формируем URL для запроса
@@ -40,7 +58,7 @@ export async function getProductsByCategory(category: string) {
 
     // Проверяем статус ответа
     if (!res.ok) {
-      const errorData = await res.json(); // Получаем данные об ошибке из API
+      const errorData = await res.json();
       throw new Error(
         errorData.error || "Failed to fetch products by category"
       );
@@ -51,7 +69,7 @@ export async function getProductsByCategory(category: string) {
     return data;
   } catch (error) {
     console.error("Ошибка при получении товаров по категории:", error);
-    return null; // Или можно вернуть объект с описанием ошибки
+    return null;
   }
 }
 

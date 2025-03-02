@@ -35,7 +35,7 @@ export function Card({ product }: CardProps) {
           <div>
             <div className="absolute flex flex-col items-start justify-between w-[248px] h-[248px] p-[10px]">
               <div className="flex flex-col items-start gap-[5px]">
-                {features.wireless && (
+                {features?.wireless && (
                   <Badge className="rounded-[15px] w-[auto] h-[27px] text-center p-[6px] bg-[#274c5b] text-[#fff] cursor-default text-[15px] outline-none">
                     Wireless
                   </Badge>

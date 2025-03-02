@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { ObjectId } from "mongodb";
 
 interface Feature {
   label: string;
@@ -27,7 +26,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
   onSave,
   onCancel,
 }) => {
-  // Убедитесь, что features всегда является массивом
+  // Убедитесь, что features и images всегда являются массивами
   const [formData, setFormData] = useState({
     _id: product._id || "",
     category_id:
@@ -52,7 +51,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
               ? "int"
               : "string",
         })),
-    images: product.images || [],
+    images: Array.isArray(product.images) ? product.images : [], // Преобразуем в массив
     stock_quantity: product.stock_quantity || 0,
     isDiscount: product.isDiscount || false,
     discountedPrice: product.discountedPrice || 0,
@@ -78,6 +77,24 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
   const removeFeature = (index: number) => {
     const updatedFeatures = formData.features.filter((_, i) => i !== index);
     setFormData({ ...formData, features: updatedFeatures });
+  };
+
+  const handleImageChange = (index: number, value: string) => {
+    const updatedImages = [...formData.images];
+    updatedImages[index] = value;
+    setFormData({ ...formData, images: updatedImages });
+  };
+
+  const addImage = () => {
+    setFormData({
+      ...formData,
+      images: [...formData.images, ""],
+    });
+  };
+
+  const removeImage = (index: number) => {
+    const updatedImages = formData.images.filter((_, i) => i !== index);
+    setFormData({ ...formData, images: updatedImages });
   };
 
   const handleSubmit = async () => {
@@ -269,18 +286,34 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
         </div>
 
         {/* Картинки */}
-        <input
-          type="text"
-          placeholder="Ссылка на картинку"
-          value={formData.images[0]}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              images: [e.target.value],
-            })
-          }
-          className="w-full p-2 border rounded"
-        />
+        <div>
+          <h3 className="font-bold">Картинки</h3>
+          {formData.images.map((image, index) => (
+            <div key={index} className="flex gap-2 items-center">
+              <input
+                type="text"
+                placeholder="Ссылка на картинку"
+                value={image}
+                onChange={(e) => handleImageChange(index, e.target.value)}
+                className="w-64 p-2 border rounded"
+              />
+              <button
+                type="button"
+                onClick={() => removeImage(index)}
+                className="text-red-500 hover:text-red-700"
+              >
+                Удалить
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addImage}
+            className="text-blue-500 hover:text-blue-700 mt-2"
+          >
+            + Добавить картинку
+          </button>
+        </div>
 
         <input
           type="number"

@@ -3,13 +3,17 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "./card";
 import { Container, SelectCard, CardSkeleton } from "./index";
-import { getProducts } from "@/app/api/api_utils";
+import {
+  getHotProducts,
+  getProducts,
+  getProductsByCategory,
+} from "@/app/api/api_utils";
 
 interface Props {
-  category?: string; // Категория (необязательное)
-  count?: number; // Количество элементов (необязательное)
-  text?: string; // Заголовок (необязательный)
-  type?: string; // Тип карточек (необязательный)
+  category?: string;
+  count?: number;
+  text?: string;
+  type?: string;
 }
 
 export const CardList: React.FC<Props> = ({
@@ -18,14 +22,21 @@ export const CardList: React.FC<Props> = ({
   count = 0,
   type,
 }) => {
-  const [products, setProducts] = useState<any[]>([]); // Состояние для хранения товаров
-  const [loading, setLoading] = useState(true); // Состояние загрузки
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Загружаем товары при монтировании компонента
     const fetchProducts = async () => {
       try {
-        const data = await getProducts();
+        let data;
+        if (category) {
+          data = await getProductsByCategory(category);
+        } else {
+          data = await getProducts();
+        }
+        if (type === "hot") {
+          data = await getHotProducts();
+        }
         let filteredProducts = data;
 
         // Ограничение количества товаров (если указано)
@@ -75,10 +86,10 @@ export const CardList: React.FC<Props> = ({
           />
         </>
       );
+    } else if (type === "hot") {
     }
-
-    // Если данные еще загружаются, показываем скелетоны
     if (loading) {
+      // Если данные еще загружаются, показываем скелетоны
       return Array.from({ length: count || 4 }).map((_, index) => (
         <CardSkeleton key={index} />
       ));
@@ -92,10 +103,8 @@ export const CardList: React.FC<Props> = ({
 
   return (
     <Container className="flex flex-col p-[20px] gap-[10px] bg-[#f5f5f5] justify-left rounded-[20px] mt-6">
-      {/* Условное отображение заголовка */}
       {text && <h1 className="text-[32px] font-extrabold">{text}</h1>}
       <div className="flex flex-wrap m-auto gap-[10px] justify-left">
-        {/* Рендерим карточки */}
         {renderCards()}
       </div>
     </Container>

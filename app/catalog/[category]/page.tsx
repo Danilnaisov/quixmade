@@ -1,6 +1,8 @@
 import { CardList, Container, Footer, Header } from "@/components/shared";
 import type { Metadata } from "next";
 import { getCategoryByName, getProductsByCategory } from "@/app/api/api_utils";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 // Генерация метаданных
 export async function generateMetadata({
@@ -11,8 +13,8 @@ export async function generateMetadata({
   const cat = await getCategoryByName(params.category);
 
   return {
-    title: cat ? `${cat.name_ru}` : "QuixMade: Категория не найдена",
-    description: cat?.description || "Описание категории",
+    title: cat ? `${cat.name_ru}` : "Категория не найдена",
+    description: cat?.description || "Категория не найдена",
   };
 }
 
@@ -24,10 +26,16 @@ export default async function CategoryPage({
 }) {
   const cat = await getCategoryByName(params.category);
   const products = await getProductsByCategory(params.category);
+  console.log(cat?.name); // Server  cable
 
   if (!cat) {
     return (
-      <div className="text-center text-2xl mt-10">Категория не найдена</div>
+      <div className="flex flex-col gap-4">
+        <div className="text-center text-2xl mt-10">Категория не найдена</div>
+        <Button className="text-center text-2xl mx-auto">
+          <Link href={"/"}>На главную</Link>
+        </Button>
+      </div>
     );
   }
 
