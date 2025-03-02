@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Heart, Images, Star } from "lucide-react";
+import { Images, Star } from "lucide-react";
 
 export function CardSkeleton() {
   return (
@@ -17,7 +17,6 @@ export function CardSkeleton() {
                   Нет в наличии
                 </Badge>
               </div>
-              <Heart color="#000" className="mr-0 cursor-pointer" />
             </div>
             <Badge className="rounded-[15px] w-[auto] h-[27px] text-center p-[7px] bg-[#efd372] text-[#274c5b] cursor-default text-[15px] outline-none">
               Sale
