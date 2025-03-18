@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/admin/ProductCard";
 import { EditProductForm } from "@/components/admin/EditProductForm";
+import { NewsCard } from "@/components/admin/NewsCard"; // Новый компонент
+import { EditNewsForm } from "@/components/admin/EditNewsForm"; // Новый компонент
 import { Title } from "@/components/shared";
 
 interface Category {
@@ -33,12 +35,24 @@ interface Product {
   isHotHit: boolean;
 }
 
+interface News {
+  _id: string;
+  slug: string;
+  short_name: string;
+  short_desc: string;
+  desc: string;
+  image: string;
+  date: string;
+}
+
 const AdminPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [news, setNews] = useState<News[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingNews, setEditingNews] = useState<News | null>(null);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -76,6 +90,12 @@ const AdminPage = () => {
       .then((res) => res.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Ошибка загрузки категорий:", error));
+
+    // Загрузка списка новостей
+    fetch("/api/news")
+      .then((res) => res.json())
+      .then((data) => setNews(data))
+      .catch((error) => console.error("Ошибка загрузки новостей:", error));
   }, [status, session, router]);
 
   if (status === "loading") {
@@ -105,34 +125,44 @@ const AdminPage = () => {
     });
   };
 
+  // Функция для добавления новой новости
+  const handleAddNews = () => {
+    setEditingNews({
+      _id: "",
+      slug: "",
+      short_name: "",
+      short_desc: "",
+      desc: "",
+      image: "",
+      date: new Date().toISOString(),
+    });
+  };
+
   return (
     <div className="p-8">
       <Button onClick={() => router.push("/")}>На главную</Button>
       <h1 className="text-2xl font-bold">Админ-панель</h1>
       <p>{session.user?.email}</p>
 
-      {/* Кнопка добавления товара */}
-      {!editingProduct && (
+      {/* Раздел товаров */}
+      <Title text="Управление товарами" className="mt-3" />
+      {!editingProduct && !editingNews && (
         <Button onClick={handleAddProduct} className="mt-4">
           Добавить товар
         </Button>
       )}
-
-      {/* Форма редактирования */}
       {editingProduct && (
         <EditProductForm
           product={editingProduct}
           categories={categories}
           onSave={(updatedProduct) => {
             if (updatedProduct._id) {
-              // Обновление существующего товара
               setProducts((prevProducts) =>
                 prevProducts.map((p) =>
                   p._id === updatedProduct._id ? updatedProduct : p
                 )
               );
             } else {
-              // Добавление нового товара
               setProducts((prevProducts) => [
                 ...prevProducts,
                 { ...updatedProduct, _id: Date.now().toString() },
@@ -143,9 +173,7 @@ const AdminPage = () => {
           onCancel={() => setEditingProduct(null)}
         />
       )}
-      <Title text="Список товаров" className="mt-3" />
-      {/* Список товаров */}
-      {!editingProduct && (
+      {!editingProduct && !editingNews && (
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {products.map((product) => (
             <ProductCard
@@ -153,7 +181,6 @@ const AdminPage = () => {
               product={product}
               onEdit={() => setEditingProduct(product)}
               onDelete={() => {
-                // Удаление товара
                 fetch(`/api/products/id/${product._id}`, { method: "DELETE" })
                   .then((res) => {
                     if (res.ok) {
@@ -170,7 +197,61 @@ const AdminPage = () => {
           ))}
         </div>
       )}
-      <Title text="Список пользователей" className="mt-3" />
+
+      {/* Раздел новостей */}
+      <Title text="Управление новостями" className="mt-6" />
+      {!editingProduct && !editingNews && (
+        <Button onClick={handleAddNews} className="mt-4">
+          Добавить новость
+        </Button>
+      )}
+      {editingNews && (
+        <EditNewsForm
+          news={editingNews}
+          onSave={(updatedNews) => {
+            if (updatedNews._id) {
+              setNews((prevNews) =>
+                prevNews.map((n) =>
+                  n._id === updatedNews._id ? updatedNews : n
+                )
+              );
+            } else {
+              setNews((prevNews) => [
+                ...prevNews,
+                { ...updatedNews, _id: Date.now().toString() },
+              ]);
+            }
+            setEditingNews(null);
+          }}
+          onCancel={() => setEditingNews(null)}
+        />
+      )}
+      {!editingProduct && !editingNews && (
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          {news.map((item) => (
+            <NewsCard
+              key={item._id}
+              news={item}
+              onEdit={() => setEditingNews(item)}
+              onDelete={() => {
+                fetch(`/api/news?slug=${item.slug}`, { method: "DELETE" })
+                  .then((res) => {
+                    if (res.ok) {
+                      setNews((prevNews) =>
+                        prevNews.filter((n) => n._id !== item._id)
+                      );
+                    }
+                  })
+                  .catch((error) =>
+                    console.error("Ошибка удаления новости:", error)
+                  );
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      <Title text="Список пользователей" className="mt-6" />
     </div>
   );
 };

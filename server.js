@@ -38,7 +38,7 @@ app.post("/image-upload", (req, res) => {
   }
 
   const bb = Busboy({ headers: req.headers });
-  let type, slug;
+  let entityType, type, slug;
   const filePaths = [];
   const filePromises = [];
 
@@ -49,10 +49,12 @@ app.post("/image-upload", (req, res) => {
 
   bb.on("field", (name, val) => {
     console.log(`Field [${name}]: value: ${val}`);
-    if (name === "type") {
-      type = val;
+    if (name === "entityType") {
+      entityType = val; // "news" или "product"
+    } else if (name === "type") {
+      type = val; // Категория товара (для продуктов)
     } else if (name === "slug") {
-      slug = val;
+      slug = val; // Slug новости или товара
     }
   });
 
@@ -60,14 +62,38 @@ app.post("/image-upload", (req, res) => {
     const { filename, mimeType } = info;
     console.log(`File [${filename}] detected with MIME type: ${mimeType}`);
 
-    if (!filename || !type || !slug) {
-      console.error("Missing required fields: type or slug");
+    // Проверка обязательных полей
+    if (!filename || !entityType || !slug) {
+      console.error("Missing required fields: entityType or slug");
       return res
         .status(400)
-        .json({ error: "Missing required fields: type or slug" });
+        .json({ error: "Missing required fields: entityType or slug" });
     }
 
-    const uploadDir = path.join(process.cwd(), "uploads", type, slug);
+    // Проверка корректности entityType
+    if (!["news", "product"].includes(entityType)) {
+      console.error("Invalid entityType: must be 'news' or 'product'");
+      return res
+        .status(400)
+        .json({ error: "Invalid entityType: must be 'news' or 'product'" });
+    }
+
+    // Если это продукт, нужен type
+    if (entityType === "product" && !type) {
+      console.error("Missing required field: type (for products)");
+      return res
+        .status(400)
+        .json({ error: "Missing required field: type (for products)" });
+    }
+
+    // Определяем путь для загрузки
+    let uploadDir;
+    if (entityType === "news") {
+      uploadDir = path.join(process.cwd(), "uploads", "news", slug);
+    } else {
+      uploadDir = path.join(process.cwd(), "uploads", type, slug);
+    }
+
     if (!existsSync(uploadDir)) {
       mkdirSync(uploadDir, { recursive: true });
     }
@@ -80,9 +106,13 @@ app.post("/image-upload", (req, res) => {
     filePromises.push(
       new Promise((resolve, reject) => {
         writeStream.on("finish", () => {
-          filePaths.push(
-            `https://api.made.quixoria.ru/uploads/${type}/${slug}/${filename}`
-          );
+          let fileUrl;
+          if (entityType === "news") {
+            fileUrl = `https://api.made.quixoria.ru/uploads/news/${slug}/${filename}`;
+          } else {
+            fileUrl = `https://api.made.quixoria.ru/uploads/${type}/${slug}/${filename}`;
+          }
+          filePaths.push(fileUrl);
           resolve();
         });
         writeStream.on("error", reject);

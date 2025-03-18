@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-
 import {
   Command,
   CommandEmpty,
@@ -72,7 +71,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
         : product.category_id || "",
     slug: product.slug || "",
     name: product.name || "",
-    price: product.price,
+    price: product.price || 0,
     short_description: product.short_description || "",
     description: product.description || "",
     features: Array.isArray(product.features)
@@ -120,19 +119,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
     const updatedFeatures = formData.features.filter((_, i) => i !== index);
     setFormData({ ...formData, features: updatedFeatures });
   };
-
-  // const handleImageChange = (index: number, value: string) => {
-  //   const updatedImages = [...formData.images];
-  //   updatedImages[index] = value;
-  //   setFormData({ ...formData, images: updatedImages });
-  // };
-
-  // const addImage = () => {
-  //   setFormData({
-  //     ...formData,
-  //     images: [...formData.images, ""],
-  //   });
-  // };
 
   const removeImage = (index: number) => {
     setFormData((prevData) => ({
@@ -191,19 +177,24 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
       alert(`Ошибка при сохранении товара: ${error}`);
     }
   };
-  const APIURL = "https://api.made.quixoria.ru";
+
+  const API_URL = "https://api.made.quixoria.ru";
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     const formDataImages = new FormData();
-    formDataImages.append("type", product.category.name);
-    formDataImages.append("slug", product.slug);
+    formDataImages.append("entityType", "product"); // Указываем, что это продукт
+    formDataImages.append(
+      "type",
+      categories.find((cat) => cat._id === formData.category_id)?.name_ru || ""
+    ); // Категория как type
+    formDataImages.append("slug", formData.slug);
     Array.from(files).forEach((file) => {
       formDataImages.append("file", file);
     });
 
     try {
-      const response = await fetch(`${APIURL}/image-upload`, {
+      const response = await fetch(`${API_URL}/image-upload`, {
         method: "POST",
         body: formDataImages,
       });
@@ -229,7 +220,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
         {formData._id ? "Редактирование товара" : "Добавление товара"}
       </h2>
       <div className="space-y-4 mt-4 flex gap-5">
-        {/* Выбор категории */}
         <div className="flex flex-col w-[550px] gap-3">
           <div className="flex flex-col gap-2">
             <label className="font-medium">Категория</label>
@@ -322,12 +312,10 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
             />
           </div>
 
-          {/* Характеристики */}
-          <div className="flex flex-col gap-2 ">
+          <div className="flex flex-col gap-2">
             <h3 className="font-bold">Характеристики</h3>
             {formData.features.map((feature, index) => (
               <div key={index} className="flex gap-2 items-center">
-                {/* Поле для названия характеристики */}
                 <input
                   type="text"
                   placeholder="Название характеристики"
@@ -337,8 +325,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
                   }
                   className="w-40 p-2 border rounded"
                 />
-
-                {/* Выбор типа характеристики */}
                 <select
                   value={feature.type}
                   onChange={(e) =>
@@ -350,10 +336,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
                   <option value="int">Число</option>
                   <option value="bool">Лог</option>
                 </select>
-
-                {/* Поле для значения характеристики */}
                 {feature.type === "bool" ? (
-                  // Switch для логического типа
                   <Switch
                     checked={Boolean(feature.value)}
                     onCheckedChange={(checked) =>
@@ -361,7 +344,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
                     }
                   />
                 ) : (
-                  // Обычное текстовое или числовое поле
                   <input
                     type={feature.type === "int" ? "number" : "text"}
                     placeholder="Значение"
@@ -378,8 +360,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
                     className="w-40 p-2 border rounded"
                   />
                 )}
-
-                {/* Кнопка удаления характеристики */}
                 <button
                   type="button"
                   onClick={() => removeFeature(index)}
@@ -413,7 +393,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
             />
           </div>
 
-          {/* Скидка */}
           <div className="flex items-center gap-2 h-[25px]">
             <label className="flex items-center gap-2">
               <Switch
@@ -439,7 +418,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
               />
             )}
           </div>
-          {/* Хит продаж */}
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2">
               <Switch
@@ -478,38 +456,6 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
             />
           </div>
 
-          {/* Картинки
-          <div>
-            <h3 className="font-bold">Картинки</h3>
-            {formData.images.map((image, index) => (
-              <div key={index} className="flex gap-2 items-center">
-                <input
-                  type="text"
-                  placeholder="Ссылка на картинку"
-                  value={image}
-                  onChange={(e) => handleImageChange(index, e.target.value)}
-                  className="w-64 p-2 border rounded"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  Удалить
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addImage}
-              className="text-blue-500 hover:text-blue-700 mt-2"
-            >
-              + Добавить картинку
-            </button>
-          </div> */}
-
-          {/* Изображения */}
-          {/* Images */}
           <div>
             <Label>Изображения</Label>
             {formData.images.length > 0 && (
@@ -542,15 +488,14 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
                 type="file"
                 multiple
                 onChange={(e) => {
-                  e.preventDefault(); // Предотвращаем обновление страницы
-                  handleImageUpload(e.target.files); // Вызываем функцию загрузки изображений
+                  e.preventDefault();
+                  handleImageUpload(e.target.files);
                 }}
                 className="w-full p-2 border rounded"
               />
             </form>
           </div>
 
-          {/* Кнопки управления */}
           <div className="flex justify-end gap-4 mt-4">
             <Button variant="outline" onClick={onCancel}>
               Отмена

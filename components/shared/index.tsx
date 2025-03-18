@@ -15,3 +15,4 @@ export { LoginPage } from "./login";
 export { AddToCartButton } from "./AddToCartButton";
 export { CartItem } from "./CartItem";
 export { CartSummary } from "./CartSummary";
+export { NewsCard } from "./newsCard";
