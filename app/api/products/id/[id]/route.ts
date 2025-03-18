@@ -112,7 +112,7 @@ export async function PUT(
     const db = client.db("quixmade");
 
     // Исключаем _id из данных перед отправкой
-    const { _id, ...updateData } = body;
+    const { ...updateData } = body;
 
     // Обновляем товар в базе данных
     const result = await db

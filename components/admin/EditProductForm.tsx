@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 import {
   Command,
@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "../ui/textarea";
 import { Switch } from "../ui/switch";
-import ImageUploadForm from "./ImageUploadForm";
+import Image from "next/image";
 
 interface Feature {
   label: string;
@@ -32,10 +32,29 @@ interface Category {
   name_ru: string;
 }
 
+interface Product {
+  _id?: string;
+  category_id: string;
+  slug: string;
+  name: string;
+  price: number;
+  short_description: string;
+  description: string;
+  features: Record<string, string | number | boolean>;
+  images: string[];
+  stock_quantity: number;
+  isDiscount: boolean;
+  discountedPrice: number;
+  isHotHit: boolean;
+  category: {
+    _id?: string;
+  };
+}
+
 interface EditProductFormProps {
-  product: any;
+  product: Product;
   categories: Category[];
-  onSave: (updatedProduct: any) => void;
+  onSave: (updatedProduct: Product) => void;
   onCancel: () => void;
 }
 
@@ -77,7 +96,11 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
 
   const [openCategory, setOpenCategory] = useState(false);
 
-  const handleFeatureChange = (index: number, field: string, value: any) => {
+  const handleFeatureChange = (
+    index: number,
+    field: string,
+    value: string | number | boolean
+  ) => {
     const updatedFeatures = [...formData.features];
     updatedFeatures[index][field as keyof Feature] = value;
     setFormData({ ...formData, features: updatedFeatures });
@@ -98,18 +121,18 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
     setFormData({ ...formData, features: updatedFeatures });
   };
 
-  const handleImageChange = (index: number, value: string) => {
-    const updatedImages = [...formData.images];
-    updatedImages[index] = value;
-    setFormData({ ...formData, images: updatedImages });
-  };
+  // const handleImageChange = (index: number, value: string) => {
+  //   const updatedImages = [...formData.images];
+  //   updatedImages[index] = value;
+  //   setFormData({ ...formData, images: updatedImages });
+  // };
 
-  const addImage = () => {
-    setFormData({
-      ...formData,
-      images: [...formData.images, ""],
-    });
-  };
+  // const addImage = () => {
+  //   setFormData({
+  //     ...formData,
+  //     images: [...formData.images, ""],
+  //   });
+  // };
 
   const removeImage = (index: number) => {
     setFormData((prevData) => ({
@@ -123,7 +146,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
       const formattedFeatures = formData.features.reduce((acc, feature) => {
         acc[feature.label] = feature.value;
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, string | number | boolean>);
 
       const updatedProduct = {
         ...formData,
@@ -168,7 +191,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
       alert(`Ошибка при сохранении товара: ${error}`);
     }
   };
-
+  const APIURL = "https://api.made.quixoria.ru";
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
@@ -180,7 +203,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
     });
 
     try {
-      const response = await fetch("/api/image-upload", {
+      const response = await fetch(`${APIURL}/image-upload`, {
         method: "POST",
         body: formDataImages,
       });
@@ -490,13 +513,15 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
           <div>
             <Label>Изображения</Label>
             {formData.images.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-wrap gap-4">
                 {formData.images.map((image, index) => (
-                  <div key={index} className="relative">
-                    <img
+                  <div key={index} className="relative border rounded-xl">
+                    <Image
                       src={image}
                       alt={`Preview ${index}`}
-                      className="w-full h-20 object-cover"
+                      width={1000}
+                      height={1000}
+                      className="w-[200px] h-[200px] object-contain"
                     />
                     <Button
                       variant="ghost"

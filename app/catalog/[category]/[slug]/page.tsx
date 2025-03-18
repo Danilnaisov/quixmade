@@ -18,7 +18,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-// Генерация метаданных
 export async function generateMetadata({
   params,
 }: {
@@ -50,7 +49,7 @@ export default async function ProductPage({
       <Header />
       <Container className="mt-[15px] w-full flex flex-col gap-[15px] items-center">
         <div className="flex flex-col gap-3">
-          <Breadcrumb>
+          <Breadcrumb className="breadcrumb">
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
@@ -77,11 +76,11 @@ export default async function ProductPage({
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <div className="flex items-center justify-center">
-            <div className="w-[710px] flex items-center justify-center">
-              <ProductPhotos slug={product.slug} className="w-[584px]" />
+          <div className="item_block flex items-center justify-center gap-4">
+            <div className="ProductPhotos w-[710px] flex items-center justify-center">
+              <ProductPhotos slug={product.slug} />
             </div>
-            <div className="flex flex-col w-[710px]">
+            <div className="ProductDesc flex flex-col w-[710px]">
               <h1>{product.name}</h1>
               <p>Отзывы</p>
               <p>Описание</p>

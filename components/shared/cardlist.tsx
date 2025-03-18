@@ -9,6 +9,25 @@ import {
   getProductsByCategory,
 } from "@/app/api/api_utils";
 
+interface Product {
+  _id?: string;
+  category_id: string;
+  slug: string;
+  name: string;
+  price: number;
+  short_description: string;
+  description: string;
+  features: Record<string, string | number | boolean>;
+  images: string[];
+  stock_quantity: number;
+  isDiscount: boolean;
+  discountedPrice: number;
+  isHotHit: boolean;
+  category: {
+    _id?: string;
+  };
+}
+
 interface Props {
   category?: string;
   count?: number;
@@ -22,7 +41,7 @@ export const CardList: React.FC<Props> = ({
   count = 0,
   type,
 }) => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,7 +75,7 @@ export const CardList: React.FC<Props> = ({
     };
 
     fetchProducts();
-  }, [category, count]);
+  }, [category, count, type]);
 
   const renderCards = () => {
     if (type === "help") {
@@ -105,10 +124,12 @@ export const CardList: React.FC<Props> = ({
   };
 
   return (
-    <Container className="flex flex-col p-[20px] gap-[10px] bg-[#f5f5f5] justify-left rounded-[20px] mt-6">
-      {text && <h1 className="text-[32px] font-extrabold">{text}</h1>}
-      <div className="flex flex-wrap m-auto gap-[10px] justify-left">
-        {renderCards()}
+    <Container className="inline-flex flex-col p-[20px] gap-[10px] bg-[#f5f5f5] justify-left rounded-[20px] mt-6">
+      <div>
+        {text && <h1 className="text-[32px] font-extrabold">{text}</h1>}
+        <div className="inline-flex flex-wrap gap-[10px] justify-center">
+          {renderCards()}
+        </div>
       </div>
     </Container>
   );

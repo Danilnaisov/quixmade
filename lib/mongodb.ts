@@ -1,7 +1,8 @@
-import { MongoClient } from "mongodb";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { MongoClient, MongoClientOptions } from "mongodb";
 
-const uri = process.env.MONGODB_URI || ""; // Убедитесь, что добавили URI в .env
-const options = {};
+const uri = process.env.MONGODB_URI || "";
+const options: MongoClientOptions = {};
 
 let client;
 let clientPromise: Promise<MongoClient>;

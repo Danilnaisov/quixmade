@@ -2,7 +2,6 @@ import { cn } from "@/lib/utils";
 import React from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { toast } from "sonner";
 
 interface Props {
   className?: string;
@@ -21,9 +20,9 @@ export const Footer: React.FC<Props> = ({ className }) => {
         Делимся полезным контентом. Присоединяйтесь!
       </h2>
       <div>
-        <div className="flex w-[825px] items-center space-x-2 bg-[#274C5B] rounded-[20px] p-2">
+        <div className="flex w-full max-w-[825px] items-center space-x-2 bg-[#274C5B] rounded-[20px] p-2">
           <Input
-            className="w-[825px] text-white text-[20px] font-medium placeholder:text-white border-transparent h-[50px]"
+            className="max-w-[825px] text-white text-[20px] font-medium placeholder:text-white border-transparent h-[50px]"
             type="email"
             placeholder="Введите e-mail"
           />

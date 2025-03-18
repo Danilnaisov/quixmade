@@ -1,18 +1,14 @@
 "use client";
 import React, { useState } from "react";
 
-interface ImageUploadFormProps {
-  onImagesUploaded: (images: string[]) => void;
-}
-
-const ImageUploadForm: React.FC<ImageUploadFormProps> = ({
-  onImagesUploaded,
-}) => {
+const ImageUploadForm = ({}) => {
   const [files, setFiles] = useState<FileList | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFiles(e.target.files);
   };
+
+  console.log(files);
 
   return (
     <div>

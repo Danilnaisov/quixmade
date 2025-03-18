@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Heart, Images, Star } from "lucide-react";
+import { Images, Star } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface Product {
@@ -29,11 +30,11 @@ export function Card({ product }: CardProps) {
     stock_quantity,
   } = product;
   return (
-    <Link href={`/catalog/${category.name}/${slug}`}>
-      <div className="flex flex-col items-left w-[268px] h-[400px] bg-[#fff] p-[10px] justify-between rounded-[10px]">
-        <div className="flex flex-col items-left gap-[10px]">
-          <div>
-            <div className="absolute flex flex-col items-start justify-between w-[248px] h-[248px] p-[10px]">
+    <Link href={`/catalog/${category.name}/${slug}`} className="w-max">
+      <div className="сard_item flex flex-col items-left w-[268px] h-[400px] bg-[#fff] p-[10px] justify-between rounded-[10px]">
+        <div className="flex flex-col items-left gap-[10px] w-max">
+          <div className="w-max">
+            <div className="сard_image absolute flex flex-col items-start justify-between w-[248px] h-[248px] p-[10px]">
               <div className="flex flex-col items-start gap-[5px]">
                 {features?.wireless && (
                   <Badge className="rounded-[15px] w-[auto] h-[27px] text-center p-[6px] bg-[#274c5b] text-[#fff] cursor-default text-[15px] outline-none">
@@ -53,13 +54,15 @@ export function Card({ product }: CardProps) {
               )}
             </div>
             {images && images.length > 0 ? (
-              <img
+              <Image
                 src={images[0]}
                 alt={name}
-                className="w-[248px] h-[248px] rounded-[10px] object-cover"
+                width={1000}
+                height={1000}
+                className="сard_image w-[248px] h-[248px] rounded-[10px] object-cover"
               />
             ) : (
-              <Skeleton className="w-[248px] h-[248px] rounded-[10px] flex justify-center items-center">
+              <Skeleton className="image_skeleton w-[248px] h-[248px] rounded-[10px] flex justify-center items-center">
                 <Images color="#333" size={64} />
               </Skeleton>
             )}
@@ -81,7 +84,7 @@ export function Card({ product }: CardProps) {
             )}
           </div>
         </div>
-        <div className="flex flex-col gap-[5px] text-[18px] font-medium">
+        <div className="flex flex-col gap-[5px] text-[18px] font-medium items-start w-max">
           <h2>{name}</h2>
           <div className="flex gap-[5px] text-[18px] font-medium">
             <Star color="#ff9d00" fill="#ff9d00" />

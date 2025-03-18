@@ -5,7 +5,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import Image from "next/image"; // Импортируем Image из next/image
+import Image from "next/image";
 import { getProductBySlug } from "@/app/api/api_utils";
 import { Skeleton } from "../ui/skeleton";
 import { Images } from "lucide-react";
@@ -15,12 +15,12 @@ interface Props {
   slug: string;
 }
 
-export const ProductPhotos: React.FC<Props> = async ({ className, slug }) => {
+export const ProductPhotos: React.FC<Props> = async ({ slug }) => {
   const product = await getProductBySlug(slug);
   // Если изображений нет, показываем заглушку
   if (!product || !product.images || product.images.length === 0) {
     return (
-      <Skeleton className="w-[584px] h-[329px] rounded-[10px] flex justify-center items-center">
+      <Skeleton className="ProductPhotosSkeleton w-[620px] h-[620px] rounded-[10px] flex justify-center items-center">
         <Images color="#333" size={64} />
       </Skeleton>
     );
@@ -28,7 +28,7 @@ export const ProductPhotos: React.FC<Props> = async ({ className, slug }) => {
 
   return (
     <Carousel
-      className={`w-[584px]`}
+      className={`ProductPhotosCarousel w-[620px]`}
       opts={{
         loop: true,
       }}
@@ -37,14 +37,14 @@ export const ProductPhotos: React.FC<Props> = async ({ className, slug }) => {
         {product.images.map((image, index) => (
           <CarouselItem key={index}>
             <div className="p-1">
-              <Card className="bg-[#717171] w-full h-full overflow-hidden">
-                <CardContent className="w-full aspect-[16/9] relative">
+              <Card className="bg-[#fff] w-full h-full overflow-hidden">
+                <CardContent className="w-full aspect-[1/1] relative">
                   <Image
                     src={image}
                     alt={`Product image ${index + 1}`}
-                    fill
-                    className=" object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    width={1000}
+                    height={1000}
+                    className="object-contain w-full h-full"
                   />
                 </CardContent>
               </Card>

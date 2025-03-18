@@ -18,7 +18,7 @@ export const SelectCard: React.FC<Props> = ({ text, ptext, link, image }) => {
 
   return (
     <Link href={link} passHref>
-      <div className="flex flex-col items-left w-[336.5px] h-[430px] bg-[#fff] p-[10px] justify-between rounded-[10px]">
+      <div className="select_card flex flex-col items-left w-[336.5px] h-[430px] bg-[#fff] p-[10px] justify-between rounded-[10px]">
         <div className="flex flex-col items-left gap-[5px]">
           <div>
             {image && !imageError ? (

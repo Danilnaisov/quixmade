@@ -52,7 +52,7 @@ const AdminPage = () => {
     fetch("/api/products")
       .then((res) => res.json())
       .then((data) => {
-        const formattedProducts = data.map((product: any) => ({
+        const formattedProducts = data.map((product: Product) => ({
           ...product,
           features: Object.entries(product.features || {}).map(
             ([key, value]) => ({

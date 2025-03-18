@@ -5,6 +5,7 @@ export { Card } from "./card";
 export { CardList } from "./cardlist";
 export { CardSkeleton } from "./cardskeleton";
 export { HeaderNavigationMenu } from "./navigationmenu";
+export { HeaderNavigationMenuMini } from "./navigationmenumini";
 export { Banner } from "./banner";
 export { SelectCard } from "./selectcard";
 export { Title } from "./title";

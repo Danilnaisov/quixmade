@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
+import Image from "next/image";
 
 interface ProductCardProps {
   product: {
@@ -29,9 +30,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <div className="border rounded-lg overflow-hidden shadow-md ">
       {/* Изображение */}
-      <img
+      <Image
         src={product.images[0] || "/default-image.jpg"}
         alt={product.name}
+        width={1000}
+        height={1000}
         className="w-full h-48 object-cover"
       />
 

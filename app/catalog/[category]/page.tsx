@@ -11,7 +11,6 @@ export async function generateMetadata({
   params: { category: string };
 }): Promise<Metadata> {
   const cat = await getCategoryByName(params.category);
-
   return {
     title: cat ? `${cat.name_ru}` : "Категория не найдена",
     description: cat?.description || "Категория не найдена",

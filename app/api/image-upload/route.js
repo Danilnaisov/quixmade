@@ -32,8 +32,6 @@ export async function POST(req) {
   const filePaths = [];
   const filePromises = [];
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       console.error("Request timed out");

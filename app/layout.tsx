@@ -33,7 +33,7 @@ export default function RootLayout({
         className={`${Font_Montserrat.variable} ${Font_Inter.variable} ${MontserratAlternates.variable} antialiased bg-white dark:bg-gray-900`}
       >
         <SessionProvider>{children}</SessionProvider>
-        
+
         <Toaster position="top-right" richColors />
       </body>
     </html>

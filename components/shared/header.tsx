@@ -8,6 +8,7 @@ import Link from "next/link";
 import { HeaderNavigationMenu } from "./navigationmenu";
 import { Container } from "./container";
 import { useSession } from "next-auth/react";
+import { HeaderNavigationMenuMini } from "./navigationmenumini";
 
 interface Props {
   className?: string;
@@ -19,18 +20,30 @@ export const Header: React.FC<Props> = ({ className }) => {
   return (
     <header
       className={cn(
-        "font-[family-name:var(--font-MontserratAlternates)] bg-[rgba(255,255,255,1)] shadow-[0px_4px_25px_0px_rgba(200,200,200,0.25)]",
+        "header font-[family-name:var(--font-MontserratAlternates)] bg-[rgba(255,255,255,1)] shadow-[0px_4px_25px_0px_rgba(200,200,200,0.25)]",
         className
       )}
     >
-      <Container className="flex items-center justify-between py-4">
-        <Link href={"/"}>
+      <Container className="flex items-center justify-between py-4 mx-auto">
+        <Link href={"/"} className="logo">
           <Image src="/logo.svg" alt="logo" width={170} height={49} />
         </Link>
-        <div>
+        <Link href={"/"} className="logo_min">
+          <Image
+            src="/logo_min.svg"
+            alt="logo"
+            width={80}
+            height={80}
+            className="w-10 h-10 min-w-10"
+          />
+        </Link>
+        <div className="header_nav">
           <HeaderNavigationMenu />
         </div>
-        <div className="flex gap-8">
+        <div className="header_nav_min">
+          <HeaderNavigationMenuMini />
+        </div>
+        <div className="flex justify-between w-full max-w-[120px]">
           <Link href={""}>
             <Search color="#274C5B" />
           </Link>

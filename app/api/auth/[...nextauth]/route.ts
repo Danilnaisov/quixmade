@@ -1,9 +1,10 @@
-import NextAuth from "next-auth";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import clientPromise from "@/lib/mongodb";
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -12,42 +13,31 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        try {
-          const client = await clientPromise;
-          const db = client.db("quixmade");
-          const user = await db.collection("users").findOne({
-            $or: [{ login: credentials?.login }, { email: credentials?.login }],
-          });
-          if (!user) {
-            console.log("Пользователь не найден");
-            throw new Error("Пользователь не найден");
-          }
+        const client = await clientPromise;
+        const db = client.db("quixmade");
+        const user = await db.collection("users").findOne({
+          $or: [{ login: credentials?.login }, { email: credentials?.login }],
+        });
 
-          const isPasswordValid = await compare(
-            credentials?.password || "",
-            user.password_hash
-          );
-          if (!isPasswordValid) {
-            console.log("Неверный пароль");
-            throw new Error("Неверный пароль");
-          }
+        if (!user) throw new Error("Пользователь не найден");
 
-          console.log("Авторизация прошла успешно");
-          return {
-            id: user._id.toString(),
-            email: user.email,
-            login: user.login,
-            role: user.role,
-          };
-        } catch (error) {
-          console.error("Ошибка при авторизации:", error);
-          throw new Error(error.message || "Ошибка авторизации");
-        }
+        const isPasswordValid = await compare(
+          credentials?.password || "",
+          user.password_hash
+        );
+
+        if (!isPasswordValid) throw new Error("Неверный пароль");
+
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          login: user.login,
+          role: user.role,
+        };
       },
     }),
   ],
   callbacks: {
-    // Добавляем ID пользователя в токен
     jwt: async ({ token, user }) => {
       if (user) {
         token.id = user.id;
@@ -68,8 +58,7 @@ export const authOptions = {
     signIn: "/api/auth/login",
     error: "/auth/error",
   },
-};
+} as const;
 
-const handler = NextAuth(authOptions);
-
+const handler: NextApiHandler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

@@ -1,10 +1,4 @@
-import {
-  Banner,
-  CardList,
-  Footer,
-  Header,
-  ProductPhotos,
-} from "@/components/shared";
+import { Banner, CardList, Footer, Header } from "@/components/shared";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

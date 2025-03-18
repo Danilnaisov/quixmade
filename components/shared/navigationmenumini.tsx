@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import {
@@ -11,7 +10,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
 const catalog: { title: string; href: string; description: string }[] = [
@@ -60,7 +58,7 @@ const accessories: { title: string; href: string; description: string }[] = [
   },
 ];
 
-export function HeaderNavigationMenu() {
+export function HeaderNavigationMenuMini() {
   return (
     <NavigationMenu>
       <NavigationMenuList className="flex justify-between">
@@ -79,15 +77,6 @@ export function HeaderNavigationMenu() {
                   {component.description}
                 </ListItem>
               ))}
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger className="text-[#274C5B] text-xl font-extrabold">
-            Аксессуары
-          </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] text-[#274C5B] text-xl">
               {accessories.map((component) => (
                 <ListItem
                   key={component.title}
@@ -99,30 +88,6 @@ export function HeaderNavigationMenu() {
               ))}
             </ul>
           </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem className="p-2 px-4">
-          <Link href="/news" legacyBehavior passHref>
-            <NavigationMenuLink
-              className={
-                (navigationMenuTriggerStyle(),
-                "text-[#274C5B] text-xl font-extrabold")
-              }
-            >
-              Новости
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-        <NavigationMenuItem className="p-2 px-4">
-          <Link href="/about" legacyBehavior passHref>
-            <NavigationMenuLink
-              className={
-                (navigationMenuTriggerStyle(),
-                "text-[#274C5B] text-xl font-extrabold")
-              }
-            >
-              О нас
-            </NavigationMenuLink>
-          </Link>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

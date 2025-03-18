@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import Link from "next/link";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface CartItemProps {
   item: {
@@ -56,14 +57,16 @@ export const CartItem: React.FC<CartItemProps> = ({
   }
 
   return (
-    <li className="flex items-center bg-white p-[10px] w-full rounded-[10px] h-[144px] justify-between">
+    <li className="cart flex items-center bg-white p-[10px] w-full rounded-[10px] h-[144px] justify-between">
       <Link href={item.link} className="flex items-center gap-4 w-max">
         {/* Картинка */}
         <div className="rounded-[10px] overflow-hidden">
           {item.image && item.image.length > 0 ? (
-            <img
+            <Image
               src={item.image}
               alt={item.name}
+              width={1000}
+              height={1000}
               className="w-[124px] h-[124px] object-cover"
             />
           ) : (

@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { CartItem } from "@/components/shared/CartItem";
 import { CartSummary } from "@/components/shared/CartSummary";
 import { Container, Footer, Header, Title } from "@/components/shared";
@@ -285,11 +284,11 @@ const CartPage = () => {
   return (
     <div className="font-[family-name:var(--font-Montserrat)] flex flex-col">
       <Header />
-      <Container className="pb-14 flex flex-col items-start justify-between w-full">
+      <Container className="pb-14 pl-3 flex flex-col items-start justify-between w-full">
         <Title text="Корзина" className="text-[32px] font-bold" />
         {cart.items.length > 0 ? (
-          <div className="flex gap-5">
-            <ul className="flex flex-col w-[1142px] h-max gap-[15px] bg-[#F5F5F5] p-5 rounded-[20px]">
+          <div className="CartWrappers flex gap-5 justify-between w-full px-5">
+            <ul className="CartWrapper flex flex-col w-[1142px] h-max gap-[15px] bg-[#F5F5F5] p-5 rounded-[20px]">
               {cart.items.map((item) => (
                 <CartItem
                   key={item.product_id}

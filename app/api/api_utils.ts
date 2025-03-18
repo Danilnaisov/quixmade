@@ -1,6 +1,5 @@
 "use server";
 
-import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 
 export async function getCategories() {
@@ -95,6 +94,40 @@ export async function getCategoryByName(categoryName: string) {
     };
   } catch (error) {
     console.error("Ошибка при получении категории:", error);
+    return null;
+  }
+}
+
+export async function getAllNews() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/news`);
+  if (!res.ok) {
+    throw new Error("Failed to fetch categories");
+  }
+  return res.json();
+}
+
+export async function getNewsBySlug(slug: string) {
+  try {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/news?slug=${slug}`;
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Failed to fetch news by slug");
+    }
+
+    const data = await res.json();
+
+    // Проверяем, является ли результат массивом
+    if (Array.isArray(data) && data.length > 0) {
+      return data[0]; // Возвращаем первый элемент массива
+    } else if (data && typeof data === "object") {
+      return data; // Если это уже объект, возвращаем его
+    } else {
+      throw new Error("News not found");
+    }
+  } catch (error) {
+    console.error("Ошибка при получении новости по slug:", error);
     return null;
   }
 }
