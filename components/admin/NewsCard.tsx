@@ -18,6 +18,7 @@ interface NewsCardProps {
     short_name: string;
     image: string;
     date: string;
+    tags: [];
     onEdit: () => void;
     onDelete: () => void;
   };

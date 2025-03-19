@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 
@@ -25,13 +26,21 @@ export async function POST(request: NextRequest) {
     const db = client.db("quixmade");
 
     const body = await request.json();
-    const { short_name, short_desc, desc, image, date, slug } = body;
+    const { short_name, short_desc, desc, image, date, slug, tags } = body;
 
-    if (!short_name || !short_desc || !desc || !image || !date || !slug) {
+    if (
+      !short_name ||
+      !short_desc ||
+      !desc ||
+      !image ||
+      !date ||
+      !slug ||
+      !tags
+    ) {
       return NextResponse.json(
         {
           error:
-            "Все поля (short_name, short_desc, desc, image, date, slug) обязательны",
+            "Все поля (short_name, short_desc, desc, image, date, slug, tags) обязательны",
         },
         { status: 400 }
       );
@@ -72,7 +81,7 @@ export async function PUT(request: NextRequest) {
     const db = client.db("quixmade");
 
     const body = await request.json();
-    const { slug, short_name, short_desc, desc, image, date } = body;
+    const { slug, short_name, short_desc, desc, image, date, tags } = body;
 
     // Проверка наличия slug
     if (!slug) {
@@ -88,6 +97,7 @@ export async function PUT(request: NextRequest) {
     if (desc) updateData.desc = desc;
     if (image) updateData.image = image;
     if (date) updateData.date = new Date(date);
+    if (tags) updateData.tags = tags;
 
     const result = await db
       .collection("news")

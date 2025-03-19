@@ -1,16 +1,15 @@
-import { Footer, Header, NewsList } from "@/components/shared";
+import { Footer, Header } from "@/components/shared";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "QuixMade: Новости",
-  description: "QuixMade: Новости",
+  title: "QuixMade: О нас",
+  description: "QuixMade: О нас",
 };
 
-export default async function ProductPage() {
+export default async function AboutPage() {
   return (
     <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen gap-4">
       <Header />
-      <NewsList />
       <Footer />
     </div>
   );

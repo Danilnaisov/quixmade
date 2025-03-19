@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
 interface News {
   _id?: string;
@@ -14,6 +15,7 @@ interface News {
   desc: string;
   image: string;
   date: string;
+  tags: string[];
 }
 
 interface EditNewsFormProps {
@@ -35,9 +37,11 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
     desc: news.desc || "",
     image: news.image || "",
     date: news.date || new Date().toISOString(),
+    tags: news.tags || [],
   });
 
   const API_URL = "https://api.made.quixoria.ru";
+
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
@@ -73,6 +77,9 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
     try {
       let response;
 
+      // Логируем данные перед отправкой
+      console.log("Отправляемые данные:", formData);
+
       if (formData._id) {
         const { _id, ...newsData } = formData;
         response = await fetch(`/api/news?slug=${formData.slug}`, {
@@ -93,8 +100,9 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
         });
 
         const responseData = await response.json();
+        console.log("Ответ от сервера:", responseData); // Логируем ответ
         if (responseData.id) {
-          formData._id = responseData.id;
+          setFormData((prev) => ({ ...prev, _id: responseData.id }));
         }
       }
 
@@ -103,17 +111,28 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
         throw new Error(errorData.error || "Ошибка при сохранении новости");
       }
 
-      onSave(formData);
+      const savedData = await response.json();
+      console.log("Сохраненные данные:", savedData);
+
+      // Обновляем formData после успешного сохранения
+      onSave({ ...formData, ...savedData });
     } catch (error) {
       console.error("Ошибка при сохранении новости:", error);
       alert(`Ошибка при сохранении новости: ${error}`);
     }
   };
 
-  // Форматируем дату для input
   const formatDateForInput = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toISOString().slice(0, 16); // Убираем миллисекунды и Z
+    return date.toISOString().slice(0, 16);
+  };
+
+  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const tagsArray = e.target.value
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+    setFormData({ ...formData, tags: tagsArray });
   };
 
   return (
@@ -156,8 +175,8 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
             <Input
               type="datetime-local"
               id="date"
-              step="1" // Добавляем шаг в 1 секунду
-              value={formatDateForInput(formData.date)} // Форматируем дату для input
+              step="1"
+              value={formatDateForInput(formData.date)}
               onChange={(e) =>
                 setFormData({
                   ...formData,
@@ -165,6 +184,24 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
                 })
               }
             />
+          </div>
+
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label htmlFor="tags">Теги (через запятую)</Label>
+            <Input
+              type="text"
+              id="tags"
+              placeholder="например: технологии, спорт, новости"
+              value={formData.tags.join(", ")}
+              onChange={handleTagsChange}
+            />
+            <div className="flex flex-wrap gap-2 mt-2">
+              {formData.tags.map((tag) => (
+                <Badge key={tag} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
         <div className="flex flex-col w-[550px] gap-3">

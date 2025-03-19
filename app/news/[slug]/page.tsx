@@ -1,4 +1,4 @@
-import { getNewsBySlug } from "@/app/api/api_utils";
+import { getNewsBySlug, getAllNews } from "@/app/api/api_utils";
 import { Container, Footer, Header, Title } from "@/components/shared";
 import { Metadata } from "next";
 import Image from "next/image";
@@ -11,6 +11,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Badge } from "@/components/ui/badge";
+import { Calendar } from "lucide-react";
+import { NewsCard } from "@/components/shared/newsCard";
+import { ShareButton } from "@/components/shared/ShareButton";
 
 export async function generateMetadata({
   params,
@@ -26,6 +30,26 @@ export async function generateMetadata({
   };
 }
 
+async function getRelatedNews(currentSlug: string, currentTags: string[]) {
+  const allNews = await getAllNews();
+  const filteredNews = allNews.filter((news) => news.slug !== currentSlug);
+
+  const relatedByTags = filteredNews
+    .filter((news) => news.tags.some((tag) => currentTags.includes(tag)))
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 4);
+
+  if (relatedByTags.length < 4) {
+    const remaining = filteredNews
+      .filter((news) => !relatedByTags.some((r) => r.slug === news.slug))
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 4 - relatedByTags.length);
+    return [...relatedByTags, ...remaining];
+  }
+
+  return relatedByTags;
+}
+
 export default async function ProductPage({
   params,
 }: {
@@ -33,9 +57,14 @@ export default async function ProductPage({
 }) {
   const { slug } = await params;
   const product = await getNewsBySlug(slug);
+  const relatedNews = await getRelatedNews(slug, product?.tags || []);
 
   if (!product) {
-    return <div className="text-center text-2xl mt-10">Новость не найдена</div>;
+    return (
+      <div className="text-center text-2xl mt-10 text-gray-500">
+        Новость не найдена
+      </div>
+    );
   }
 
   const formattedDate = new Date(product.date).toLocaleString("ru-RU", {
@@ -47,48 +76,93 @@ export default async function ProductPage({
   });
 
   return (
-    <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen gap-4">
+    <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen gap-6 bg-gray-50">
       <Header />
-      <Container className="max-w-3xl mx-auto px-4">
-        <Breadcrumb className="breadcrumb">
+      <Container className="max-w-4xl mx-auto px-4 py-8">
+        <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/">Главная</Link>
+                <Link href="/" className="text-blue-600 hover:underline">
+                  Главная
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/news">Новости</Link>
+                <Link href="/news" className="text-blue-600 hover:underline">
+                  Новости
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{product.short_name}</BreadcrumbPage>
+              <BreadcrumbPage className="text-gray-800">
+                {product.short_name}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <Title
-            text={product.short_name}
-            size="md"
-            className="font-extrabold text-gray-800 mb-4"
-          />
-          <div className="relative w-full h-96 mb-4">
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="flex justify-between items-center mb-6">
+            <Title
+              text={product.short_name}
+              size="lg"
+              className="font-extrabold text-gray-900 leading-tight"
+            />
+            <ShareButton slug={slug} />
+          </div>
+          <div className="relative w-full h-[500px] mb-6 rounded-lg overflow-hidden">
             <Image
               src={product.image}
               alt={product.short_name}
               fill
-              className="object-contain rounded-lg"
+              className="object-cover transition-transform duration-500 hover:scale-105"
               sizes="(max-width: 768px) 100vw, 768px"
             />
+            <Badge className="absolute top-3 right-3 bg-blue-500 text-white">
+              Новости
+            </Badge>
           </div>
-          <p className="text-gray-600 text-base font-medium mb-4">
+          <div className="flex flex-wrap gap-2 mb-6">
+            {product.tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-gray-600">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          <p className="text-gray-700 text-lg leading-relaxed mb-6">
             {product.desc}
           </p>
-          <div className="text-xs text-gray-400">{formattedDate}</div>
+          <div className="flex items-center gap-2 text-sm text-gray-500 italic">
+            <Calendar size={16} />
+            <span>{formattedDate}</span>
+          </div>
         </div>
+
+        {relatedNews.length > 0 && (
+          <div className="mt-10">
+            <Title
+              text="Похожие новости"
+              size="md"
+              className="font-bold text-gray-900 mb-6"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+              {relatedNews.map((item) => (
+                <NewsCard
+                  key={item.slug}
+                  title={item.short_name}
+                  description={item.short_desc}
+                  imageUrl={item.image}
+                  slug={item.slug}
+                  date={item.date}
+                  tags={item.tags}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </Container>
       <Footer />
     </div>

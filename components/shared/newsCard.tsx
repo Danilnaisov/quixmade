@@ -1,7 +1,8 @@
-// components/shared/NewsCard.tsx
 import Image from "next/image";
 import { Title } from "@/components/shared";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, ChevronRight } from "lucide-react";
 
 interface NewsCardProps {
   title: string;
@@ -9,6 +10,7 @@ interface NewsCardProps {
   imageUrl: string;
   slug: string;
   date: string;
+  tags: string[];
   className?: string;
 }
 
@@ -18,9 +20,9 @@ export const NewsCard = ({
   imageUrl,
   slug,
   date,
+  tags,
   className = "",
 }: NewsCardProps) => {
-  // Форматируем дату без секунд
   const formattedDate = new Date(date).toLocaleString("ru-RU", {
     day: "numeric",
     month: "long",
@@ -30,29 +32,48 @@ export const NewsCard = ({
   });
 
   return (
-    <Link href={`/news/${slug}`} className="px-4 max-w-[1000px]">
+    <Link href={`/news/${slug}`} className="group block px-4 max-w-[1000px]">
       <div
-        className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 ${className}`}
+        className={`bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${className}`}
       >
-        <div className="relative w-full h-[400px]">
+        <div className="relative w-full h-[300px] overflow-hidden">
           <Image
             src={imageUrl}
             alt={title}
             fill
-            className="object-cover"
-            sizes="100vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
+          <Badge className="absolute top-3 right-3 bg-blue-500 hover:bg-blue-600 text-white">
+            Новости
+          </Badge>
         </div>
-        <div className="p-4">
+        <div className="p-5">
           <Title
             text={title}
             size="sm"
-            className="font-bold text-gray-800 mb-2 line-clamp-2"
+            className="font-bold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors duration-200"
           />
-          <p className="text-gray-600 text-sm line-clamp-3 mb-2">
+          <p className="text-gray-700 text-sm line-clamp-2 mb-3 leading-relaxed">
             {description}
           </p>
-          <div className="text-xs text-gray-400">{formattedDate}</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {tags.map((tag) => (
+              <Badge key={tag} variant="outline" className="text-gray-600">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              <Calendar size={14} />
+              <span>{formattedDate}</span>
+            </div>
+            <div className="flex items-center gap-1 text-blue-600 text-sm font-semibold group-hover:underline">
+              <span>Читать далее</span>
+              <ChevronRight size={16} />
+            </div>
+          </div>
         </div>
       </div>
     </Link>

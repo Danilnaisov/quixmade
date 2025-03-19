@@ -4,7 +4,6 @@ import { getCategoryByName, getProductsByCategory } from "@/app/api/api_utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-// Генерация метаданных
 export async function generateMetadata({
   params,
 }: {

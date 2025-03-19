@@ -99,11 +99,21 @@ export async function getCategoryByName(categoryName: string) {
 }
 
 export async function getAllNews() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/news`);
-  if (!res.ok) {
-    throw new Error("Failed to fetch categories");
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return [];
   }
-  return res.json();
+  try {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/news`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error("Failed to fetch news");
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("Ошибка при получении новостей:", error);
+    return [];
+  }
 }
 
 export async function getNewsBySlug(slug: string) {

@@ -16,3 +16,4 @@ export { AddToCartButton } from "./AddToCartButton";
 export { CartItem } from "./CartItem";
 export { CartSummary } from "./CartSummary";
 export { NewsCard } from "./newsCard";
+export { NewsList } from "./newsList";
