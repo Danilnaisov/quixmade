@@ -18,7 +18,6 @@ interface NewsCardProps {
     short_name: string;
     image: string;
     date: string;
-    tags: [];
     onEdit: () => void;
     onDelete: () => void;
   };
@@ -33,41 +32,47 @@ export const NewsCard: React.FC<NewsCardProps> = ({
     day: "numeric",
     month: "long",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 
   return (
-    <div className="border rounded-lg overflow-hidden shadow-md">
+    <div className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 bg-white">
       <Image
         src={news.image || "/default-image.jpg"}
         alt={news.short_name}
-        width={1000}
-        height={1000}
+        width={300}
+        height={300}
         className="w-full h-48 object-cover"
       />
       <div className="p-4">
-        <h3 className="font-bold">{news.short_name}</h3>
-        <p className="text-xs text-gray-400">{formattedDate}</p>
-        <div className="flex justify-between mt-4">
-          <Button onClick={onEdit}>Редактировать</Button>
+        <h3 className="font-bold text-gray-900 truncate">{news.short_name}</h3>
+        <p className="text-sm text-gray-500">{formattedDate}</p>
+        <div className="flex justify-between mt-4 gap-2">
+          <Button
+            onClick={onEdit}
+            variant="outline"
+            size="sm"
+            className="flex-1"
+          >
+            Редактировать
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">Удалить</Button>
+              <Button variant="destructive" size="sm" className="flex-1">
+                Удалить
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
+                <AlertDialogTitle>Удалить новость?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Это действие удалит новость. Вы не сможете отменить это
-                  действие.
+                  Вы уверены? Это действие нельзя отменить.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Отмена</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={onDelete}
-                  className="bg-red-500 hover:bg-red-400"
+                  className="bg-red-500 hover:bg-red-600"
                 >
                   Удалить
                 </AlertDialogAction>

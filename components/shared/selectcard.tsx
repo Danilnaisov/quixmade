@@ -18,28 +18,25 @@ export const SelectCard: React.FC<Props> = ({ text, ptext, link, image }) => {
 
   return (
     <Link href={link} passHref>
-      <div className="select_card flex flex-col items-left w-[336.5px] h-[430px] bg-[#fff] p-[10px] justify-between rounded-[10px]">
-        <div className="flex flex-col items-left gap-[5px]">
-          <div>
-            {image && !imageError ? (
-              <Image
-                src={image}
-                alt="image"
-                width={318}
-                height={318}
-                onError={() => setImageError(true)}
-                className="rounded-[10px]"
-              />
-            ) : (
-              <Skeleton className="w-[318px] h-[318px] rounded-[10px] flex justify-center items-center">
-                <Images color="#333" size={64} />
-              </Skeleton>
-            )}
-          </div>
-          <h2 className="text-[20px] font-bold text-[#274C5B]">{text}</h2>
+      <div className="select-card flex flex-col items-start bg-white p-4 rounded-[10px] shadow-md hover:shadow-lg transition-shadow duration-300 w-full h-full">
+        <div className="relative w-full aspect-[4/3]">
+          {image && !imageError ? (
+            <Image
+              src={image}
+              alt={text || "image"}
+              fill
+              className="rounded-[10px] object-cover"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <Skeleton className="w-full h-full rounded-[10px] flex justify-center items-center">
+              <Images color="#333" size={64} />
+            </Skeleton>
+          )}
         </div>
-        <div className="flex flex-col gap-[5px] text-[16px] font-medium">
-          <p>{ptext}</p>
+        <div className="flex flex-col gap-2 mt-3">
+          <h2 className="text-lg font-bold text-gray-900">{text}</h2>
+          <p className="text-sm text-gray-600">{ptext}</p>
         </div>
       </div>
     </Link>

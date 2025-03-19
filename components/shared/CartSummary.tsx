@@ -35,69 +35,71 @@ export const CartSummary: React.FC<CartSummaryProps> = ({
   className,
 }) => {
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <p className="text-[32px] font-bold">Итого:</p>
-      {totalSavings > 0 ? (
-        <span className="text-[16px] font-medium w-full flex justify-between">
-          <p>{totalItems} товара(-ов)</p>
-          <p>{summary + totalSavings} ₽</p>
-        </span>
-      ) : (
-        <span className="text-[16px] font-medium w-full flex justify-between">
-          <p>{totalItems} товара(-ов)</p>
-          <p>{summary} ₽</p>
-        </span>
+    <div
+      className={cn(
+        "flex flex-col gap-4 p-6 bg-white rounded-xl shadow-md sticky top-20",
+        className
       )}
-      {totalSavings > 0 && (
-        <span className="text-[16px] font-medium w-full flex justify-between">
-          <p>Выгода: </p>
-          <p className="text-[#9C341F]">-{totalSavings} ₽</p>
-        </span>
-      )}
-      <p className="text-[32px] text-[#006933] font-bold">{summary} ₽</p>
-
-      {/* Кнопки очистить и заказать */}
+    >
+      <p className="text-2xl font-bold text-gray-900">Итого</p>
+      <div className="flex flex-col gap-2">
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>{totalItems} товара(-ов)</span>
+          <span>
+            {totalSavings > 0
+              ? (summary + totalSavings).toLocaleString()
+              : summary.toLocaleString()}{" "}
+            ₽
+          </span>
+        </div>
+        {totalSavings > 0 && (
+          <div className="flex justify-between text-sm">
+            <span>Выгода:</span>
+            <span className="text-green-500">
+              -{totalSavings.toLocaleString()} ₽
+            </span>
+          </div>
+        )}
+      </div>
+      <p className="text-3xl font-extrabold text-[#006933]">
+        {summary.toLocaleString()} ₽
+      </p>
       <div className="flex flex-col gap-3 mt-4">
-        {/* Диалоговое окно для очистки корзины */}
+        <Button
+          onClick={onCheckout}
+          disabled={isDisabled}
+          className="bg-[#006933] hover:bg-[#004d24] text-white"
+        >
+          Оформить заказ
+        </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
-              variant="destructive"
+              variant="outline"
               disabled={isDisabled}
-              className={`px-4 py-2 ${
-                isDisabled && "opacity-50 cursor-not-allowed"
-              }`}
+              className="text-red-500 border-red-500 hover:bg-red-50"
             >
               Очистить корзину
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
+              <AlertDialogTitle>Очистить корзину?</AlertDialogTitle>
               <AlertDialogDescription>
-                Это действие очистит вашу корзину. Вы не сможете отменить это
-                действие.
+                Вы уверены? Это действие удалит все товары из корзины.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Отмена</AlertDialogCancel>
-              <AlertDialogAction onClick={onClearCart}>
+              <AlertDialogAction
+                onClick={onClearCart}
+                className="bg-red-500 hover:bg-red-600"
+              >
                 Очистить
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
-        {/* Кнопка оформления заказа */}
-        <Button
-          onClick={onCheckout}
-          disabled={isDisabled}
-          className={`px-4 py-2 ${
-            isDisabled && "opacity-50 cursor-not-allowed"
-          }`}
-        >
-          Оформить заказ
-        </Button>
       </div>
     </div>
   );

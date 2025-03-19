@@ -50,11 +50,11 @@ app.post("/image-upload", (req, res) => {
   bb.on("field", (name, val) => {
     console.log(`Field [${name}]: value: ${val}`);
     if (name === "entityType") {
-      entityType = val; // "news" или "product"
+      entityType = val; // "news", "product" или "banner"
     } else if (name === "type") {
       type = val; // Категория товара (для продуктов)
     } else if (name === "slug") {
-      slug = val; // Slug новости или товара
+      slug = val; // Slug новости или товара (опционально)
     }
   });
 
@@ -63,19 +63,29 @@ app.post("/image-upload", (req, res) => {
     console.log(`File [${filename}] detected with MIME type: ${mimeType}`);
 
     // Проверка обязательных полей
-    if (!filename || !entityType || !slug) {
-      console.error("Missing required fields: entityType or slug");
+    if (!filename || !entityType) {
+      console.error("Missing required fields: entityType");
       return res
         .status(400)
-        .json({ error: "Missing required fields: entityType or slug" });
+        .json({ error: "Missing required fields: entityType" });
+    }
+
+    // Для новостей и продуктов нужен slug
+    if (["news", "product"].includes(entityType) && !slug) {
+      console.error("Missing required field: slug (for news or products)");
+      return res
+        .status(400)
+        .json({ error: "Missing required field: slug (for news or products)" });
     }
 
     // Проверка корректности entityType
-    if (!["news", "product"].includes(entityType)) {
-      console.error("Invalid entityType: must be 'news' or 'product'");
-      return res
-        .status(400)
-        .json({ error: "Invalid entityType: must be 'news' or 'product'" });
+    if (!["news", "product", "banner"].includes(entityType)) {
+      console.error(
+        "Invalid entityType: must be 'news', 'product', or 'banner'"
+      );
+      return res.status(400).json({
+        error: "Invalid entityType: must be 'news', 'product', or 'banner'",
+      });
     }
 
     // Если это продукт, нужен type
@@ -86,19 +96,33 @@ app.post("/image-upload", (req, res) => {
         .json({ error: "Missing required field: type (for products)" });
     }
 
+    // Проверка MIME-типа (только изображения)
+    if (!mimeType.startsWith("image/")) {
+      console.error("Invalid file type: only images are allowed");
+      return res
+        .status(400)
+        .json({ error: "Invalid file type: only images are allowed" });
+    }
+
     // Определяем путь для загрузки
     let uploadDir;
     if (entityType === "news") {
       uploadDir = path.join(process.cwd(), "uploads", "news", slug);
-    } else {
+    } else if (entityType === "product") {
       uploadDir = path.join(process.cwd(), "uploads", type, slug);
+    } else if (entityType === "banner") {
+      uploadDir = path.join(process.cwd(), "uploads", "banners");
     }
 
     if (!existsSync(uploadDir)) {
       mkdirSync(uploadDir, { recursive: true });
     }
 
-    const filePath = path.join(uploadDir, filename);
+    // Для баннеров добавляем уникальный суффикс к имени файла, чтобы избежать перезаписи
+    const timestamp = Date.now();
+    const uniqueFilename =
+      entityType === "banner" ? `${timestamp}-${filename}` : filename;
+    const filePath = path.join(uploadDir, uniqueFilename);
     const writeStream = fs.createWriteStream(filePath);
 
     file.pipe(writeStream);
@@ -109,13 +133,18 @@ app.post("/image-upload", (req, res) => {
           let fileUrl;
           if (entityType === "news") {
             fileUrl = `https://api.made.quixoria.ru/uploads/news/${slug}/${filename}`;
-          } else {
+          } else if (entityType === "product") {
             fileUrl = `https://api.made.quixoria.ru/uploads/${type}/${slug}/${filename}`;
+          } else if (entityType === "banner") {
+            fileUrl = `https://api.made.quixoria.ru/uploads/banners/${uniqueFilename}`;
           }
           filePaths.push(fileUrl);
           resolve();
         });
-        writeStream.on("error", reject);
+        writeStream.on("error", (err) => {
+          console.error("Error writing file:", err);
+          reject(err);
+        });
       })
     );
   });
@@ -124,6 +153,9 @@ app.post("/image-upload", (req, res) => {
     clearTimeout(timeout);
     try {
       await Promise.all(filePromises);
+      if (filePaths.length === 0) {
+        return res.status(400).json({ error: "No files were uploaded" });
+      }
       res.status(200).json({
         message: "Files uploaded successfully",
         filePaths,

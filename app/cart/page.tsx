@@ -7,6 +7,9 @@ import { CartItem } from "@/components/shared/CartItem";
 import { CartSummary } from "@/components/shared/CartSummary";
 import { Container, Footer, Header, Title } from "@/components/shared";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ShoppingBag } from "lucide-react";
 
 interface CartItemData {
   product_id: string;
@@ -16,7 +19,8 @@ interface CartItemData {
   quantity: number;
   stock_quantity: number;
   savings: number;
-  images: string[];
+  image: string; // Заменяем images на image
+  link: string; // Добавляем link
 }
 
 interface CartData {
@@ -43,39 +47,31 @@ const CartPage = () => {
   }, [status, session, router]);
 
   if (status === "loading" || !cart) {
-    return <p>Загрузка...</p>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl text-gray-600 animate-pulse">Загрузка...</p>
+      </div>
+    );
   }
 
   const updateQuantity = async (product_id: string, newQuantity: number) => {
     try {
       const response = await fetch("/api/cart", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          product_id,
-          quantity: newQuantity,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id, quantity: newQuantity }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-
-        toast(errorData.error || "Ошибка при обновлении количества товара", {
-          action: {
-            label: "Ок",
-            onClick: () => console.log(),
-          },
+        toast.error(errorData.error || "Ошибка при обновлении количества", {
+          duration: 3000,
         });
-        // alert(errorData.error || "Ошибка при обновлении количества товара");
         return;
       }
 
-      // Обновляем состояние корзины
       setCart((prevCart) => {
         if (!prevCart) return null;
-
         const updatedItems = prevCart.items.map((item) =>
           item.product_id === product_id
             ? {
@@ -88,17 +84,14 @@ const CartPage = () => {
               }
             : item
         );
-
         const updatedSummary = updatedItems.reduce(
           (sum, item) => sum + item.price * item.quantity,
           0
         );
-
         const updatedTotalSavings = updatedItems.reduce(
           (sum, item) => sum + item.savings,
           0
         );
-
         return {
           ...prevCart,
           items: updatedItems,
@@ -107,62 +100,42 @@ const CartPage = () => {
         };
       });
     } catch (error) {
-      console.error("Ошибка при обновлении количества товара:", error);
-
-      toast("Ошибка при обновлении количества товара", {
-        action: {
-          label: "Ок",
-          onClick: () => console.log(),
-        },
+      console.error("Ошибка при обновлении количества:", error);
+      toast.error("Произошла ошибка при обновлении количества", {
+        duration: 3000,
       });
-
-      // alert("Произошла ошибка при обновлении количества товара");
     }
   };
 
-  // Функция для удаления товара из корзины
   const removeItem = async (product_id: string) => {
     try {
       const response = await fetch("/api/cart", {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          product_id,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-
-        toast(errorData.error || "Ошибка при удалении товара из корзины", {
-          action: {
-            label: "Ок",
-            onClick: () => console.log(),
-          },
+        toast.error(errorData.error || "Ошибка при удалении товара", {
+          duration: 3000,
         });
-        // alert(errorData.error || "Ошибка при удалении товара из корзины");
         return;
       }
 
       setCart((prevCart) => {
         if (!prevCart) return null;
-
         const updatedItems = prevCart.items.filter(
           (item) => item.product_id !== product_id
         );
-
         const updatedSummary = updatedItems.reduce(
           (sum, item) => sum + item.price * item.quantity,
           0
         );
-
         const updatedTotalSavings = updatedItems.reduce(
           (sum, item) => sum + item.savings,
           0
         );
-
         return {
           ...prevCart,
           items: updatedItems,
@@ -170,49 +143,29 @@ const CartPage = () => {
           totalSavings: updatedTotalSavings,
         };
       });
+      toast.success("Товар удалён из корзины", { duration: 2000 });
     } catch (error) {
-      console.error("Ошибка при удалении товара из корзины:", error);
-      toast("Произошла ошибка при удалении товара из корзины", {
-        action: {
-          label: "Ок",
-          onClick: () => console.log(),
-        },
-      });
-      // alert("Произошла ошибка при удалении товара из корзины");
+      console.error("Ошибка при удалении товара:", error);
+      toast.error("Произошла ошибка при удалении товара", { duration: 3000 });
     }
   };
 
-  // Функция для оформления заказа
   const handleCheckout = async () => {
     try {
       const response = await fetch("/api/cart/checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        // alert(errorData.error || "Ошибка при оформлении заказа");
-        toast(errorData.error || "Ошибка при оформлении заказа", {
-          action: {
-            label: "Ок",
-            onClick: () => console.log(),
-          },
+        toast.error(errorData.error || "Ошибка при оформлении заказа", {
+          duration: 3000,
         });
         return;
       }
 
-      toast("Заказ успешно оформлен!", {
-        action: {
-          label: "Ок",
-          onClick: () => console.log(),
-        },
-      });
-
-      // alert("Заказ успешно оформлен!");
-      // После успешного оформления заказа очищаем корзину
+      toast.success("Заказ успешно оформлен!", { duration: 3000 });
       setCart((prevCart) => ({
         ...prevCart!,
         items: [],
@@ -222,46 +175,26 @@ const CartPage = () => {
       }));
     } catch (error) {
       console.error("Ошибка при оформлении заказа:", error);
-      toast("Произошла ошибка при оформлении заказа", {
-        action: {
-          label: "Ок",
-          onClick: () => console.log(),
-        },
-      });
-      // alert("Произошла ошибка при оформлении заказа");
+      toast.error("Произошла ошибка при оформлении заказа", { duration: 3000 });
     }
   };
 
-  // Функция для очистки корзины
   const handleClearCart = async () => {
     try {
       const response = await fetch("/api/cart/clear", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        // alert(errorData.error || "Ошибка при очистке корзины");
-        toast(errorData.error || "Ошибка при очистке корзины", {
-          action: {
-            label: "Ок",
-            onClick: () => console.log(),
-          },
+        toast.error(errorData.error || "Ошибка при очистке корзины", {
+          duration: 3000,
         });
         return;
       }
 
-      toast("Корзина успешно очищена!", {
-        action: {
-          label: "Ок",
-          onClick: () => console.log(),
-        },
-      });
-      // alert("Корзина успешно очищена!");
-
+      toast.success("Корзина успешно очищена!", { duration: 2000 });
       setCart((prevCart) => ({
         ...prevCart!,
         items: [],
@@ -271,24 +204,21 @@ const CartPage = () => {
       }));
     } catch (error) {
       console.error("Ошибка при очистке корзины:", error);
-      toast("Произошла ошибка при очистке корзины", {
-        action: {
-          label: "Ок",
-          onClick: () => console.log(),
-        },
-      });
-      // alert("Произошла ошибка при очистке корзины");
+      toast.error("Произошла ошибка при очистке корзины", { duration: 3000 });
     }
   };
 
   return (
-    <div className="font-[family-name:var(--font-Montserrat)] flex flex-col">
+    <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen bg-gray-50">
       <Header />
-      <Container className="pb-14 pl-3 flex flex-col items-start justify-between w-full">
-        <Title text="Корзина" className="text-[32px] font-bold" />
+      <Container className="py-10 flex flex-col items-center gap-8 w-full max-w-6xl mx-auto">
+        <Title
+          text="Ваша корзина"
+          className="text-4xl font-extrabold text-gray-900"
+        />
         {cart.items.length > 0 ? (
-          <div className="CartWrappers flex gap-5 justify-between w-full px-5">
-            <ul className="CartWrapper flex flex-col w-[1142px] h-max gap-[15px] bg-[#F5F5F5] p-5 rounded-[20px]">
+          <div className="flex flex-col md:flex-row gap-8 w-full">
+            <ul className="flex flex-col gap-6 w-full md:w-2/3">
               {cart.items.map((item) => (
                 <CartItem
                   key={item.product_id}
@@ -311,7 +241,7 @@ const CartPage = () => {
               ))}
             </ul>
             <CartSummary
-              className="w-[258px]"
+              className="w-full md:w-1/3"
               totalItems={cart.items.reduce(
                 (sum, item) => sum + item.quantity,
                 0
@@ -324,7 +254,13 @@ const CartPage = () => {
             />
           </div>
         ) : (
-          <p>Корзина пуста</p>
+          <div className="text-center py-20">
+            <ShoppingBag className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-xl text-gray-600 mb-6">Ваша корзина пуста</p>
+            <Button asChild variant="outline">
+              <Link href="/catalog">Продолжить покупки</Link>
+            </Button>
+          </div>
         )}
       </Container>
       <Footer />

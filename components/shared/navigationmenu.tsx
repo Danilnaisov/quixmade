@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-
 import { cn } from "@/lib/utils";
 import {
   NavigationMenu,
@@ -13,6 +12,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { ChevronDown } from "lucide-react";
 
 const catalog: { title: string; href: string; description: string }[] = [
   {
@@ -60,16 +60,110 @@ const accessories: { title: string; href: string; description: string }[] = [
   },
 ];
 
-export function HeaderNavigationMenu() {
+interface HeaderNavigationMenuProps {
+  isMobile?: boolean;
+}
+
+export function HeaderNavigationMenu({ isMobile }: HeaderNavigationMenuProps) {
+  const [openMenu, setOpenMenu] = React.useState<string | null>(null);
+
+  const toggleSubMenu = (menu: string) => {
+    setOpenMenu(openMenu === menu ? null : menu);
+  };
+
+  if (isMobile) {
+    return (
+      <nav className="flex flex-col gap-2">
+        {/* Каталог */}
+        <div>
+          <button
+            onClick={() => toggleSubMenu("catalog")}
+            className="flex items-center justify-between w-full text-[#274C5B] text-lg font-bold py-2"
+          >
+            Каталог
+            <ChevronDown
+              className={cn(
+                "ml-2 transition-transform",
+                openMenu === "catalog" && "rotate-180"
+              )}
+              size={20}
+            />
+          </button>
+          {openMenu === "catalog" && (
+            <ul className="pl-4 flex flex-col gap-2">
+              {catalog.map((item) => (
+                <li key={item.title}>
+                  <Link
+                    href={item.href}
+                    className="block text-[#274C5B] text-base hover:text-[#006933] transition-colors"
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Аксессуары */}
+        <div>
+          <button
+            onClick={() => toggleSubMenu("accessories")}
+            className="flex items-center justify-between w-full text-[#274C5B] text-lg font-bold py-2"
+          >
+            Аксессуары
+            <ChevronDown
+              className={cn(
+                "ml-2 transition-transform",
+                openMenu === "accessories" && "rotate-180"
+              )}
+              size={20}
+            />
+          </button>
+          {openMenu === "accessories" && (
+            <ul className="pl-4 flex flex-col gap-2">
+              {accessories.map((item) => (
+                <li key={item.title}>
+                  <Link
+                    href={item.href}
+                    className="block text-[#274C5B] text-base hover:text-[#006933] transition-colors"
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Новости */}
+        <Link
+          href="/news"
+          className="text-[#274C5B] text-lg font-bold py-2 hover:text-[#006933] transition-colors"
+        >
+          Новости
+        </Link>
+
+        {/* О нас */}
+        <Link
+          href="/about"
+          className="text-[#274C5B] text-lg font-bold py-2 hover:text-[#006933] transition-colors"
+        >
+          О нас
+        </Link>
+      </nav>
+    );
+  }
+
   return (
     <NavigationMenu>
-      <NavigationMenuList className="flex justify-between">
+      <NavigationMenuList className="flex gap-4">
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="text-[#274C5B] text-xl font-extrabold">
+          <NavigationMenuTrigger className="text-[#274C5B] text-lg font-bold bg-transparent hover:bg-gray-100">
             Каталог
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-2 p-2 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+            <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
               {catalog.map((component) => (
                 <ListItem
                   key={component.title}
@@ -83,11 +177,11 @@ export function HeaderNavigationMenu() {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="text-[#274C5B] text-xl font-extrabold">
+          <NavigationMenuTrigger className="text-[#274C5B] text-lg font-bold bg-transparent hover:bg-gray-100">
             Аксессуары
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] text-[#274C5B] text-xl">
+            <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
               {accessories.map((component) => (
                 <ListItem
                   key={component.title}
@@ -100,25 +194,25 @@ export function HeaderNavigationMenu() {
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
-        <NavigationMenuItem className="p-2 px-4">
+        <NavigationMenuItem>
           <Link href="/news" legacyBehavior passHref>
             <NavigationMenuLink
-              className={
-                (navigationMenuTriggerStyle(),
-                "text-[#274C5B] text-xl font-extrabold")
-              }
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "text-[#274C5B] text-lg font-bold bg-transparent hover:bg-gray-100"
+              )}
             >
               Новости
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
-        <NavigationMenuItem className="p-2 px-4">
+        <NavigationMenuItem>
           <Link href="/about" legacyBehavior passHref>
             <NavigationMenuLink
-              className={
-                (navigationMenuTriggerStyle(),
-                "text-[#274C5B] text-xl font-extrabold")
-              }
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "text-[#274C5B] text-lg font-bold bg-transparent hover:bg-gray-100"
+              )}
             >
               О нас
             </NavigationMenuLink>
@@ -139,7 +233,7 @@ const ListItem = React.forwardRef<
         <a
           ref={ref}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 hover:text-[#006933] focus:bg-gray-100 focus:text-[#006933]",
             className
           )}
           {...props}
@@ -147,7 +241,7 @@ const ListItem = React.forwardRef<
           <div className="text-lg text-[#274C5B] font-bold leading-none">
             {title}
           </div>
-          <p className="line-clamp-2 text-sm text-[#274C5B] leading-snug text-muted-foreground">
+          <p className="line-clamp-2 text-sm text-gray-600 leading-snug">
             {children}
           </p>
         </a>

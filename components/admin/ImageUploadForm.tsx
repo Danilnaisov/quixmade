@@ -1,10 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 interface ImageUploadFormProps {
-  entityType: "news" | "product"; // Определяет, что загружается (новость или товар)
+  entityType: "news" | "product" | "banner";
   type?: string; // Категория для продуктов, опционально
-  slug: string; // Slug сущности
+  slug?: string; // Slug сущности, опционально для баннеров
   onUploadSuccess?: (filePaths: string[]) => void; // Callback для обработки успешной загрузки
 }
 
@@ -15,65 +16,73 @@ const ImageUploadForm: React.FC<ImageUploadFormProps> = ({
   onUploadSuccess,
 }) => {
   const [files, setFiles] = useState<FileList | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFiles(e.target.files);
   };
 
-  const handleImageUpload = async () => {
-    if (!files || files.length === 0) return;
+  useEffect(() => {
+    const uploadImages = async () => {
+      if (!files || files.length === 0) return;
 
-    const formDataImages = new FormData();
-    formDataImages.append("entityType", entityType);
-    if (entityType === "product" && type) {
-      formDataImages.append("type", type); // Добавляем тип только для продуктов
-    }
-    formDataImages.append("slug", slug);
-    Array.from(files).forEach((file) => {
-      formDataImages.append("file", file);
-    });
-
-    try {
-      const response = await fetch(
-        `https://api.made.quixoria.ru/image-upload`,
-        {
-          method: "POST",
-          body: formDataImages,
-        }
-      );
-      const result = await response.json();
-
-      if (response.ok) {
-        if (onUploadSuccess) {
-          onUploadSuccess(result.filePaths);
-        }
-        setFiles(null); // Сбрасываем состояние после успешной загрузки
-      } else {
-        alert(`Error: ${result.error}`);
+      setIsUploading(true);
+      const formDataImages = new FormData();
+      formDataImages.append("entityType", entityType);
+      if (entityType === "product" && type) {
+        formDataImages.append("type", type);
       }
-    } catch (error) {
-      console.error("Error uploading files:", error);
-      alert("An error occurred while uploading files.");
-    }
-  };
+      if (entityType !== "banner" && slug) {
+        formDataImages.append("slug", slug);
+      }
+      Array.from(files).forEach((file) => {
+        formDataImages.append("file", file);
+      });
+
+      try {
+        const response = await fetch(
+          `https://api.made.quixoria.ru/image-upload`,
+          {
+            method: "POST",
+            body: formDataImages,
+          }
+        );
+        const result = await response.json();
+
+        if (response.ok) {
+          if (onUploadSuccess) {
+            onUploadSuccess(result.filePaths);
+          }
+          setFiles(null);
+          toast.success("Изображение успешно загружено");
+        } else {
+          toast.error(`Ошибка: ${result.error}`);
+        }
+      } catch (error) {
+        console.error("Ошибка при загрузке файлов:", error);
+        toast.error("Произошла ошибка при загрузке файлов");
+      } finally {
+        setIsUploading(false);
+      }
+    };
+
+    uploadImages();
+  }, [files, entityType, type, slug, onUploadSuccess]);
 
   return (
     <div>
-      <label className="block">Select Images:</label>
+      <label className="block text-sm font-medium text-gray-700">
+        Выберите изображения:
+      </label>
       <input
         type="file"
-        multiple
+        multiple={entityType !== "banner"} // Для баннеров только одно изображение
+        accept="image/*"
         onChange={handleFileChange}
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded mt-1"
+        disabled={isUploading}
       />
-      {files && files.length > 0 && (
-        <button
-          onClick={handleImageUpload}
-          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Upload Images
-        </button>
-      )}
+      {isUploading && <p className="text-sm text-gray-500 mt-1">Загрузка...</p>}
     </div>
   );
 };

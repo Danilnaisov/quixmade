@@ -11,41 +11,51 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
-interface ProductCardProps {
-  product: {
+interface BannerCardProps {
+  banner: {
     _id: string;
-    name: string;
-    images: string[];
-    price: number;
-    stock_quantity: number;
-    onEdit: () => void;
-    onDelete: () => void;
+    image: string;
+    link: string;
+    status: "active" | "inactive" | "advertising";
   };
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
-  product,
+export const BannerCard: React.FC<BannerCardProps> = ({
+  banner,
   onEdit,
   onDelete,
 }) => {
   return (
     <div className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 bg-white">
       <Image
-        src={product.images[0] || "/default-image.jpg"}
-        alt={product.name}
+        src={banner.image || "/default-image.jpg"}
+        alt="Banner"
         width={300}
-        height={300}
+        height={150}
         className="w-full h-48 object-cover"
       />
       <div className="p-4">
-        <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
-        <p className="text-sm text-gray-600">
-          {product.price.toLocaleString()} ₽
-        </p>
-        <p className="text-sm text-gray-500">
-          В наличии: {product.stock_quantity}
-        </p>
+        <h3 className="font-bold text-gray-900 truncate">Баннер</h3>
+        <p className="text-sm text-gray-500 truncate">Ссылка: {banner.link}</p>
+        <Badge
+          className={
+            banner.status === "advertising"
+              ? "bg-yellow-500 text-white"
+              : banner.status === "active"
+              ? "bg-green-500 text-white"
+              : "bg-gray-500 text-white"
+          }
+        >
+          {banner.status === "advertising"
+            ? "Реклама"
+            : banner.status === "active"
+            ? "Активен"
+            : "Неактивен"}
+        </Badge>
         <div className="flex justify-between mt-4 gap-2">
           <Button
             onClick={onEdit}
@@ -63,7 +73,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Удалить товар?</AlertDialogTitle>
+                <AlertDialogTitle>Удалить баннер?</AlertDialogTitle>
                 <AlertDialogDescription>
                   Вы уверены? Это действие нельзя отменить.
                 </AlertDialogDescription>

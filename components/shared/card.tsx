@@ -3,14 +3,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Images, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface Product {
-  id: string;
+  _id?: string;
+  category: { name: string };
+  slug: string;
   name: string;
   price: number;
-  discountedPrice?: number; // Цена со скидкой (опционально)
-  images?: string[]; // Массив ссылок на изображения (опционально)
-  isDiscount: boolean; // Есть ли скидка
+  features: Record<string, string | number | boolean>;
+  discountedPrice: number;
+  images: string[];
+  isDiscount: boolean;
+  stock_quantity: number;
 }
 
 interface CardProps {
@@ -29,66 +34,114 @@ export function Card({ product }: CardProps) {
     isDiscount,
     stock_quantity,
   } = product;
+
+  const isOutOfStock = stock_quantity <= 0;
+
   return (
-    <Link href={`/catalog/${category.name}/${slug}`} className="w-max">
-      <div className="сard_item flex flex-col items-left w-[268px] h-[400px] bg-[#fff] p-[10px] justify-between rounded-[10px]">
-        <div className="flex flex-col items-left gap-[10px] w-max">
-          <div className="w-max">
-            <div className="сard_image absolute flex flex-col items-start justify-between w-[248px] h-[248px] p-[10px]">
-              <div className="flex flex-col items-start gap-[5px]">
-                {features?.wireless && (
-                  <Badge className="rounded-[15px] w-[auto] h-[27px] text-center p-[6px] bg-[#274c5b] text-[#fff] cursor-default text-[15px] outline-none">
-                    Wireless
-                  </Badge>
-                )}
-                {stock_quantity <= 0 && (
-                  <Badge className="rounded-[15px] w-[auto] h-[27px] text-center p-[12px] bg-[#f5f5f5] text-[#274c5b] cursor-default text-[15px] outline-none">
-                    Нет в наличии
-                  </Badge>
-                )}
-              </div>
-              {isDiscount && (
-                <Badge className="absolute top-2 right-2 rounded-[15px] px-[7px] py-[4px] bg-[#efd372] text-[#274c5b] font-medium">
-                  Sale
+    <Link
+      href={`/catalog/${category.name}/${slug}`}
+      className={cn("block", isOutOfStock && "pointer-events-none")}
+    >
+      <div
+        className={cn(
+          "card-item flex flex-col items-start p-4 rounded-[10px] shadow-md transition-shadow duration-300 w-full h-full min-w-[120px]",
+          isOutOfStock
+            ? "bg-gray-200 text-gray-500"
+            : "bg-white hover:shadow-lg"
+        )}
+      >
+        <div className="relative w-full aspect-square">
+          {images && images.length > 0 ? (
+            <Image
+              src={images[0]}
+              alt={name}
+              fill
+              className={cn(
+                "rounded-[10px] object-cover",
+                isOutOfStock && "opacity-50"
+              )}
+            />
+          ) : (
+            <Skeleton className="w-full h-full rounded-[10px] flex justify-center items-center">
+              <Images color="#333" size={64} />
+            </Skeleton>
+          )}
+          <div className="absolute inset-0 flex flex-col justify-between p-3">
+            <div className="flex flex-col gap-2">
+              {features?.wireless && (
+                <Badge
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs w-fit",
+                    isOutOfStock
+                      ? "bg-gray-300 text-gray-600"
+                      : "bg-[#274c5b] text-white"
+                  )}
+                >
+                  Wireless
                 </Badge>
               )}
             </div>
-            {images && images.length > 0 ? (
-              <Image
-                src={images[0]}
-                alt={name}
-                width={1000}
-                height={1000}
-                className="сard_image w-[248px] h-[248px] rounded-[10px] object-cover"
-              />
-            ) : (
-              <Skeleton className="image_skeleton w-[248px] h-[248px] rounded-[10px] flex justify-center items-center">
-                <Images color="#333" size={64} />
-              </Skeleton>
-            )}
-          </div>
-          <div className="flex gap-[8px] text-[18px] font-medium">
-            {isDiscount ? (
-              <>
-                <h2 className="text-[18px] font-[700] text-[#F20D0D]">
-                  {discountedPrice.toLocaleString()} ₽
-                </h2>
-                <h2 className="line-through text-[13px] font-[700] text-[#274C5B]">
-                  {price.toLocaleString()} ₽
-                </h2>
-              </>
-            ) : (
-              <h2 className="text-[18px] font-[700] text-[#F20D0D]">
-                {price.toLocaleString()} ₽
-              </h2>
+            {isDiscount && (
+              <Badge
+                className={cn(
+                  "absolute top-2 right-2 rounded-full px-3 py-1 text-xs w-fit",
+                  isOutOfStock
+                    ? "bg-gray-300 text-gray-600"
+                    : "bg-[#efd372] text-[#274c5b]"
+                )}
+              >
+                Sale
+              </Badge>
             )}
           </div>
         </div>
-        <div className="flex flex-col gap-[5px] text-[18px] font-medium items-start w-max">
-          <h2>{name}</h2>
-          <div className="flex gap-[5px] text-[18px] font-medium">
-            <Star color="#ff9d00" fill="#ff9d00" />
-            <h2>4.4</h2>
+        <div className="flex flex-col gap-2 mt-3 w-full">
+          <div className="flex gap-2 items-center">
+            {isDiscount ? (
+              <>
+                <span
+                  className={cn(
+                    "text-xl font-bold",
+                    isOutOfStock ? "text-gray-500" : "text-[#F20D0D]"
+                  )}
+                >
+                  {discountedPrice.toLocaleString()} ₽
+                </span>
+                <span
+                  className={cn(
+                    "text-sm line-through",
+                    isOutOfStock ? "text-gray-400" : "text-gray-500"
+                  )}
+                >
+                  {price.toLocaleString()} ₽
+                </span>
+              </>
+            ) : (
+              <span
+                className={cn(
+                  "text-xl font-bold",
+                  isOutOfStock ? "text-gray-500" : "text-[#F20D0D]"
+                )}
+              >
+                {price.toLocaleString()} ₽
+              </span>
+            )}
+          </div>
+          <h2
+            className={cn(
+              "text-base font-medium truncate",
+              isOutOfStock ? "text-gray-500" : "text-gray-900"
+            )}
+          >
+            {name}
+          </h2>
+          <div className="flex items-center gap-1">
+            <Star
+              color={isOutOfStock ? "#d1d5db" : "#ff9d00"}
+              fill={isOutOfStock ? "#d1d5db" : "#ff9d00"}
+              size={16}
+            />
+            <span className="text-sm text-gray-600">4.4</span>
           </div>
         </div>
       </div>

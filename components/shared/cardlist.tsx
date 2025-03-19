@@ -25,6 +25,7 @@ interface Product {
   isHotHit: boolean;
   category: {
     _id?: string;
+    name: string;
   };
 }
 
@@ -58,13 +59,8 @@ export const CardList: React.FC<Props> = ({
         }
 
         const shuffledProducts = [...data].sort(() => Math.random() - 0.5);
-
-        let filteredProducts = shuffledProducts;
-
-        // Ограничение количества товаров (если указано)
-        if (count > 0) {
-          filteredProducts = filteredProducts.slice(0, count);
-        }
+        const filteredProducts =
+          count > 0 ? shuffledProducts.slice(0, count) : shuffledProducts;
 
         setProducts(filteredProducts);
       } catch (error) {
@@ -79,9 +75,8 @@ export const CardList: React.FC<Props> = ({
 
   const renderCards = () => {
     if (type === "help") {
-      // Рендерим SelectCard, если тип "help"
       return (
-        <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <SelectCard
             text="Полноразмерные клавиатуры"
             ptext="100-90%"
@@ -106,31 +101,38 @@ export const CardList: React.FC<Props> = ({
             link=""
             image="/notstandart.png"
           />
-        </>
+        </div>
       );
-    } else if (type === "hot") {
-    }
-    if (loading) {
-      // Если данные еще загружаются, показываем скелетоны
-      return Array.from({ length: count || 4 }).map((_, index) => (
-        <CardSkeleton key={index} />
-      ));
     }
 
-    // Рендерим карточки товаров
-    return products.map((product) => (
-      <Card key={product._id} product={product} />
-    ));
+    if (loading) {
+      return (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {Array.from({ length: count || 4 }).map((_, index) => (
+            <CardSkeleton key={index} />
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {products.map((product) => (
+          <Card key={product._id} product={product} />
+        ))}
+      </div>
+    );
   };
 
   return (
-    <Container className="inline-flex flex-col p-[20px] gap-[10px] bg-[#f5f5f5] justify-left rounded-[20px] mt-6">
-      <div>
-        {text && <h1 className="text-[32px] font-extrabold">{text}</h1>}
-        <div className="inline-flex flex-wrap gap-[10px] justify-center">
-          {renderCards()}
-        </div>
-      </div>
+    <Container className="flex flex-col p-5 gap-4 bg-white rounded-[20px] mt-6 shadow-md">
+      {text && (
+        <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-2">
+          {text}
+          {type === "hot"}
+        </h1>
+      )}
+      {renderCards()}
     </Container>
   );
 };

@@ -78,9 +78,9 @@ export default async function ProductPage({
   return (
     <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen gap-6 bg-gray-50">
       <Header />
-      <Container className="max-w-4xl mx-auto px-4 py-8">
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
+      <Container className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <Breadcrumb className="mb-4 w-full overflow-hidden">
+          <BreadcrumbList className="flex flex-wrap">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link href="/" className="text-blue-600 hover:underline">
@@ -98,57 +98,56 @@ export default async function ProductPage({
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-gray-800">
+              <BreadcrumbPage className="text-gray-800 truncate text-wrap">
                 {product.short_name}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex justify-between items-center mb-6">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
             <Title
               text={product.short_name}
               size="lg"
-              className="font-extrabold text-gray-900 leading-tight"
+              className="font-extrabold text-gray-900 leading-tight text-xl sm:text-2xl lg:text-3xl"
             />
             <ShareButton slug={slug} />
           </div>
-          <div className="relative w-full h-[500px] mb-6 rounded-lg overflow-hidden">
+          <div className="relative w-full h-64 sm:h-80 lg:h-[500px] mb-4 sm:mb-6 rounded-lg overflow-hidden">
             <Image
               src={product.image}
               alt={product.short_name}
               fill
               className="object-cover transition-transform duration-500 hover:scale-105"
-              sizes="(max-width: 768px) 100vw, 768px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 768px"
             />
-            <Badge className="absolute top-3 right-3 bg-blue-500 text-white">
+            <Badge className="absolute top-3 right-3 bg-blue-500 text-white text-xs sm:text-sm">
               Новости
             </Badge>
           </div>
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
             {product.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-gray-600">
+              <Badge
+                key={tag}
+                variant="secondary"
+                className="text-gray-600 text-xs sm:text-sm"
+              >
                 {tag}
               </Badge>
             ))}
           </div>
-          <p className="text-gray-700 text-lg leading-relaxed mb-6">
+          <p className="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6">
             {product.desc}
           </p>
-          <div className="flex items-center gap-2 text-sm text-gray-500 italic">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 italic">
             <Calendar size={16} />
             <span>{formattedDate}</span>
           </div>
         </div>
 
         {relatedNews.length > 0 && (
-          <div className="mt-10">
-            <Title
-              text="Похожие новости"
-              size="md"
-              className="font-bold text-gray-900 mb-6"
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="mt-8 sm:mt-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
               {relatedNews.map((item) => (
                 <NewsCard
                   key={item.slug}
