@@ -6,13 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { NewsEditor } from "./NewsEditor";
 
 interface News {
   _id?: string;
   slug: string;
   short_name: string;
   short_desc: string;
-  desc: string;
+  content: { type: string; value: string; alt?: string }[];
   image: string;
   date: string;
   tags: string[];
@@ -34,7 +35,7 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
     slug: news.slug || "",
     short_name: news.short_name || "",
     short_desc: news.short_desc || "",
-    desc: news.desc || "",
+    content: news.content || [{ type: "text", value: "" }],
     image: news.image || "",
     date: news.date || new Date().toISOString(),
     tags: news.tags || [],
@@ -77,7 +78,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
     try {
       let response;
 
-      // Логируем данные перед отправкой
       console.log("Отправляемые данные:", formData);
 
       if (formData._id) {
@@ -100,7 +100,7 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
         });
 
         const responseData = await response.json();
-        console.log("Ответ от сервера:", responseData); // Логируем ответ
+        console.log("Ответ от сервера:", responseData);
         if (responseData.id) {
           setFormData((prev) => ({ ...prev, _id: responseData.id }));
         }
@@ -114,7 +114,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
       const savedData = await response.json();
       console.log("Сохраненные данные:", savedData);
 
-      // Обновляем formData после успешного сохранения
       onSave({ ...formData, ...savedData });
     } catch (error) {
       console.error("Ошибка при сохранении новости:", error);
@@ -204,8 +203,8 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
             </div>
           </div>
         </div>
-        <div className="flex flex-col w-[550px] gap-3">
-          <div className="grid w-full max-w-sm items-center gap-1.5">
+        <div className="flex flex-col w-[750px] gap-3">
+          <div className="grid w-full items-center gap-1.5">
             <Label htmlFor="short_desc">Краткое описание</Label>
             <Textarea
               className="h-[70px]"
@@ -217,21 +216,17 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
               }
             />
           </div>
-          <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Label htmlFor="desc">Полное описание</Label>
-            <Textarea
-              className="h-[120px]"
-              id="desc"
-              placeholder="Полное описание"
-              value={formData.desc}
-              onChange={(e) =>
-                setFormData({ ...formData, desc: e.target.value })
-              }
+          <div className="grid w-full items-center gap-1.5">
+            <Label>Полное описание</Label>
+            <NewsEditor
+              content={formData.content}
+              onChange={(content) => setFormData({ ...formData, content })}
+              slug={formData.slug} // Передаём slug
             />
           </div>
 
           <div>
-            <Label>Изображение</Label>
+            <Label>Изображение обложки</Label>
             {formData.image && (
               <div className="relative border rounded-xl">
                 <Image
@@ -260,7 +255,7 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
                   e.preventDefault();
                   handleImageUpload(e.target.files);
                 }}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded mt-2"
               />
             </form>
           </div>

@@ -5,22 +5,6 @@ import { NextRequest } from "next/server";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session || !session.user?.id) {
-      return new Response(JSON.stringify({ error: "Не авторизован" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    if (session.user.role !== "admin") {
-      return new Response(JSON.stringify({ error: "Доступ запрещён" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
     const client = await clientPromise;
     const db = client.db("quixmade");
 

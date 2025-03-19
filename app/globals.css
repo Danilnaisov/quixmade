@@ -93,6 +93,39 @@ body {
   display: none;
 }
 
+.prose > * {
+  display: inline; /* Убедимся, что все дочерние элементы отображаются в строку */
+}
+
+.prose p {
+  display: block; /* Абзацы остаются блочными */
+  margin-bottom: 1rem;
+  line-height: 1.75;
+}
+
+.prose strong {
+  font-weight: 700;
+  color: #1a202c;
+  display: inline;
+}
+
+.prose em {
+  font-style: italic;
+  color: #2d3748;
+  display: inline;
+}
+
+.prose a {
+  color: #1a73e8;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+  display: inline;
+}
+
+.prose a:hover {
+  color: #1557b0;
+}
+
 @media screen and (max-width: 1435px) {
   .item_block {
     width: 100%;
@@ -106,4 +139,17 @@ body {
   .logo {
     display: none;
   }
+}
+
+.team-member-image {
+  border: 2px solid #e5e7eb;
+  transition: transform 0.3s ease;
+}
+
+.team-member-card {
+  transition: transform 0.3s ease;
+}
+
+.team-member-card:hover .team-member-image {
+  transform: scale(1.05);
 }

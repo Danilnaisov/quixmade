@@ -24,7 +24,6 @@ export default async function CategoryPage({
 }) {
   const cat = await getCategoryByName(params.category);
   const products = await getProductsByCategory(params.category);
-  console.log(cat?.name); // Server  cable
 
   if (!cat) {
     return (

@@ -128,11 +128,10 @@ export async function getNewsBySlug(slug: string) {
 
     const data = await res.json();
 
-    // Проверяем, является ли результат массивом
     if (Array.isArray(data) && data.length > 0) {
-      return data[0]; // Возвращаем первый элемент массива
+      return data[0];
     } else if (data && typeof data === "object") {
-      return data; // Если это уже объект, возвращаем его
+      return data;
     } else {
       throw new Error("News not found");
     }

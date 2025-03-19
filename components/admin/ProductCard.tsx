@@ -34,8 +34,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <Image
         src={product.images[0] || "/default-image.jpg"}
         alt={product.name}
-        width={300}
-        height={300}
+        width={1000}
+        height={1000}
         className="w-full h-48 object-cover"
       />
       <div className="p-4">

@@ -34,8 +34,8 @@ export const BannerCard: React.FC<BannerCardProps> = ({
       <Image
         src={banner.image || "/default-image.jpg"}
         alt="Banner"
-        width={300}
-        height={150}
+        width={1000}
+        height={1000}
         className="w-full h-48 object-cover"
       />
       <div className="p-4">

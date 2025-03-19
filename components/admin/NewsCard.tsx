@@ -39,8 +39,8 @@ export const NewsCard: React.FC<NewsCardProps> = ({
       <Image
         src={news.image || "/default-image.jpg"}
         alt={news.short_name}
-        width={300}
-        height={300}
+        width={1000}
+        height={1000}
         className="w-full h-48 object-cover"
       />
       <div className="p-4">

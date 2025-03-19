@@ -182,6 +182,40 @@ export default async function ProductPage({
             {line}
           </p>
         ))}
+
+        {Object.keys(product.features).length > 0 && (
+          <div className="mt-6">
+            <Title
+              text="Характеристики"
+              className="text-2xl sm:text-3xl font-bold mb-4"
+            />
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <table className="w-full">
+                <tbody>
+                  {Object.entries(product.features).map(
+                    ([key, value], index) => {
+                      const displayKey =
+                        key === "wireless" ? "Беспроводная" : key;
+                      const displayValue =
+                        key === "wireless" ? (value ? "Да" : "Нет") : value;
+
+                      return (
+                        <tr key={index} className="border-b last:border-b-0">
+                          <td className="py-2 text-sm sm:text-base text-gray-600 font-medium">
+                            {displayKey}
+                          </td>
+                          <td className="py-2 text-sm sm:text-base text-gray-900 text-right">
+                            {displayValue}
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </Container>
       <Container className="bg-[#F9F8F8] rounded-3xl p-6 sm:p-8 w-full max-w-6xl mb-6">
         <Title text="Отзывы" className="text-2xl sm:text-3xl font-bold mb-4" />

@@ -15,6 +15,12 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 import { NewsCard } from "@/components/shared/newsCard";
 import { ShareButton } from "@/components/shared/ShareButton";
+import DOMPurify from "dompurify";
+import { JSDOM } from "jsdom";
+
+// Настраиваем DOMPurify для работы на сервере
+const { window } = new JSDOM("<!DOCTYPE html>");
+const purify = DOMPurify(window);
 
 export async function generateMetadata({
   params,
@@ -111,7 +117,7 @@ export default async function ProductPage({
               size="lg"
               className="font-extrabold text-gray-900 leading-tight text-xl sm:text-2xl lg:text-3xl"
             />
-            <ShareButton slug={slug} />
+            <ShareButton slug={slug} type="news" />
           </div>
           <div className="relative w-full h-64 sm:h-80 lg:h-[500px] mb-4 sm:mb-6 rounded-lg overflow-hidden">
             <Image
@@ -136,9 +142,39 @@ export default async function ProductPage({
               </Badge>
             ))}
           </div>
-          <p className="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6">
-            {product.desc}
-          </p>
+          <div className="flex flex-col gap-6 mb-4 sm:mb-6">
+            {product.content.map((block, index) => {
+              if (block.type === "text") {
+                // Нормализуем HTML, убирая лишние пробелы и переносы строк
+                const normalizedHtml = block.value.replace(/\s+/g, " ").trim();
+                const sanitizedHtml = purify.sanitize(normalizedHtml);
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col gap-4 prose prose-lg text-gray-700 leading-relaxed"
+                    style={{ whiteSpace: "pre-wrap" }}
+                    dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+                  />
+                );
+              } else if (block.type === "image") {
+                return (
+                  <div
+                    key={index}
+                    className="relative w-full h-64 sm:h-80 lg:h-96 rounded-lg overflow-hidden"
+                  >
+                    <Image
+                      src={block.value}
+                      alt={block.alt || "Изображение в новости"}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 768px"
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
           <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 italic">
             <Calendar size={16} />
             <span>{formattedDate}</span>
