@@ -5,7 +5,6 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 
-// Font configurations
 const Font_Montserrat = Montserrat({
   variable: "--font-Montserrat",
   subsets: ["cyrillic"],

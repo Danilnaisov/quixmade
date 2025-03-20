@@ -1,0 +1,18 @@
+# *
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /api
+
+Disallow: /index$
+
+Disallow: *&
+
+Allow: /error.html
+
+# Host
+Host: made.quixoria.ru
+
+# Sitemaps
+Sitemap: https://made.quixoria.ru/sitemap.xml

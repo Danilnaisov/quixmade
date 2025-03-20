@@ -28,7 +28,6 @@ export default function AboutPage() {
     <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen gap-6 bg-gray-50">
       <Header />
       <Container className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Хлебные крошки */}
         <AnimatedDiv>
           <Breadcrumb className="mb-4 w-full overflow-hidden">
             <BreadcrumbList className="flex flex-wrap">
@@ -49,7 +48,6 @@ export default function AboutPage() {
           </Breadcrumb>
         </AnimatedDiv>
 
-        {/* Основной контент */}
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
           <AnimatedDiv
             initial={{ opacity: 0, x: -20 }}
@@ -63,7 +61,7 @@ export default function AboutPage() {
             />
           </AnimatedDiv>
 
-          {/* Введение */}
+          {/* Добро пожаловать */}
           <AnimatedSection className="mb-8">
             <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
               Добро пожаловать на QuixMade! Мы — команда энтузиастов технологий,
@@ -113,6 +111,15 @@ export default function AboutPage() {
                   разработку и поддержку сайта, обеспечивая его бесперебойную
                   работу и удобство для пользователей.
                 </p>
+                <a href="" className="text-blue-600 hover:underline">
+                  Telegram
+                </a>
+                <a
+                  href="mailto:danil.chetin@gmail.com"
+                  className="text-blue-600 hover:underline"
+                >
+                  danil.chetin@gmail.com
+                </a>
               </AnimatedTeamMember>
               <AnimatedTeamMember className="flex flex-col items-center">
                 <div className="relative w-32 h-32 rounded-full overflow-hidden mb-4">
@@ -133,6 +140,15 @@ export default function AboutPage() {
                   для обзоров и всегда в курсе последних трендов в мире
                   технологий.
                 </p>
+                <a href="" className="text-blue-600 hover:underline">
+                  Telegram
+                </a>
+                <a
+                  href="mailto:shtorm2006@gmail.com"
+                  className="text-blue-600 hover:underline"
+                >
+                  shtorm2006@gmail.com
+                </a>
               </AnimatedTeamMember>
               <AnimatedTeamMember className="flex flex-col items-center">
                 <div className="relative w-32 h-32 rounded-full overflow-hidden mb-4">
@@ -158,6 +174,9 @@ export default function AboutPage() {
                   </b>
                   &#34;, глядя на экран с трёх метров. Что он тут делает?
                 </p>
+                <p className="text-blue-600 cursor-pointer hover:underline">
+                  Мы не знаем его
+                </p>
               </AnimatedTeamMember>
             </div>
           </AnimatedSection>
@@ -175,7 +194,7 @@ export default function AboutPage() {
             </ul>
           </AnimatedSection>
 
-          {/* Призыв к действию */}
+          {/* Подписка */}
           <AnimatedSection className="text-center">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
               Присоединяйтесь к нам!
@@ -211,7 +230,7 @@ export default function AboutPage() {
               Мы всегда рады вашим вопросам и предложениям! Свяжитесь с нами
               через форму ниже или по указанным контактам.
             </p>
-            <form className="space-y-4">
+            <form className="space-y-4" action={""} method="POST">
               <div>
                 <label
                   htmlFor="name"
