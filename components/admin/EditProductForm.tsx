@@ -186,7 +186,7 @@ export const EditProductForm: React.FC<EditProductFormProps> = ({
     formDataImages.append("entityType", "product"); // Указываем, что это продукт
     formDataImages.append(
       "type",
-      categories.find((cat) => cat._id === formData.category_id)?.name_ru || ""
+      categories.find((cat) => cat._id === formData.category_id)?.name || ""
     ); // Категория как type
     formDataImages.append("slug", formData.slug);
     Array.from(files).forEach((file) => {

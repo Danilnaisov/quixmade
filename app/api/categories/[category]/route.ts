@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { category: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ category: string }> } // params передаётся через второй аргумент
 ) {
   try {
-    const { category } = params;
+    const { category } = await params; // Дожидаемся params
 
     // Подключаемся к MongoDB
     const client = await clientPromise;
     const db = client.db("quixmade");
 
-    // Ищем категорию по имени (поле name)
+    // Ищем категорию по имени
     const categoryDoc = await db
       .collection("categories")
       .findOne({ name: category });

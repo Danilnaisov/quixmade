@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
@@ -8,6 +9,7 @@ import { Container, Footer, Header, Title } from "@/components/shared";
 import { toast } from "sonner";
 import { ShoppingBag, ShoppingCart, LogOut, Shield, Copy } from "lucide-react";
 import Link from "next/link";
+import { ReviewForm } from "@/components/shared/ReviewForm";
 
 interface OrderItem {
   product_id: string;
@@ -28,37 +30,69 @@ const UserPage = () => {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [userReviews, setUserReviews] = useState<any[]>([]); // Инициализируем как пустой массив
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetch("/api/order")
-        .then((res) => {
+    const fetchOrders = async () => {
+      if (status === "authenticated") {
+        try {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/order`
+          );
           if (!res.ok) {
             throw new Error("Ошибка при загрузке заказов");
           }
-          return res.json();
-        })
-        .then((data) => {
+          const data = await res.json();
           setOrders(data);
           setLoadingOrders(false);
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error("Ошибка загрузки заказов:", error);
           toast.error("Не удалось загрузить заказы", { duration: 3000 });
           setLoadingOrders(false);
-        });
-    } else if (status === "unauthenticated") {
-      router.push("/auth/login");
-    }
-  }, [status, router]);
+        }
+      } else if (status === "unauthenticated") {
+        router.push("/auth/login");
+      }
+    };
 
-  // Функция для укорачивания ID
+    const fetchUserReviews = async () => {
+      if (session?.user?.id) {
+        try {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/reviews?userId=${session.user.id}`
+          );
+          if (!res.ok) {
+            throw new Error("Ошибка при загрузке отзывов");
+          }
+          const reviews = await res.json();
+          if (Array.isArray(reviews)) {
+            setUserReviews(reviews);
+          } else {
+            console.error("API /api/reviews did not return an array:", reviews);
+            setUserReviews([]);
+          }
+        } catch (error) {
+          console.error("Ошибка загрузки отзывов:", error);
+          toast.error("Не удалось загрузить отзывы", { duration: 3000 });
+          setUserReviews([]);
+        } finally {
+          setLoadingReviews(false);
+        }
+      } else {
+        setLoadingReviews(false);
+      }
+    };
+
+    fetchOrders();
+    fetchUserReviews();
+  }, [status, router, session]);
+
   const shortenId = (id: string) => {
     if (id.length <= 8) return id;
     return `${id.slice(0, 4)}...${id.slice(-4)}`;
   };
 
-  // Функция для копирования ID в буфер обмена
   const copyToClipboard = async (id: string) => {
     try {
       await navigator.clipboard.writeText(id);
@@ -89,7 +123,6 @@ const UserPage = () => {
     <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen bg-gray-50">
       <Header />
       <Container className="py-10 flex flex-col gap-8 w-full max-w-4xl mx-auto">
-        {/* Заголовок и кнопка выхода */}
         <div className="flex justify-between items-center">
           <Title
             text={`Личный кабинет`}
@@ -107,7 +140,6 @@ const UserPage = () => {
           </Button>
         </div>
 
-        {/* Информация о пользователе */}
         <div className="bg-white p-6 rounded-xl shadow-md">
           <p className="text-2xl font-semibold text-gray-900 mb-4">
             Добро пожаловать, {userName}!
@@ -143,7 +175,6 @@ const UserPage = () => {
           </div>
         </div>
 
-        {/* Список заказов */}
         <div className="flex flex-col gap-6">
           <Title
             text="Ваши заказы"
@@ -196,25 +227,53 @@ const UserPage = () => {
                         </div>
                       </div>
                       <ul className="flex flex-col gap-4 border-t pt-4">
-                        {order.items.map((item) => (
-                          <li
-                            key={item.product_id}
-                            className="flex justify-between items-center"
-                          >
-                            <div>
-                              <p className="font-medium text-gray-800">
-                                {item.name}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {item.price.toLocaleString()} ₽ ×{" "}
-                                {item.quantity}
-                              </p>
-                            </div>
-                            <p className="font-medium text-gray-900">
-                              {(item.price * item.quantity).toLocaleString()} ₽
-                            </p>
-                          </li>
-                        ))}
+                        {order.items.map((item) => {
+                          const existingReview = Array.isArray(userReviews)
+                            ? userReviews.find(
+                                (review) =>
+                                  review.product_id.toString() ===
+                                    item.product_id &&
+                                  review.user_id.toString() === session.user.id
+                              )
+                            : null;
+                          return (
+                            <li
+                              key={item.product_id}
+                              className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2"
+                            >
+                              <div>
+                                <p className="font-medium text-gray-800">
+                                  {item.name}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  {item.price.toLocaleString()} ₽ ×{" "}
+                                  {item.quantity}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-gray-900">
+                                  {(
+                                    item.price * item.quantity
+                                  ).toLocaleString()}{" "}
+                                  ₽
+                                </p>
+                                {loadingReviews ? (
+                                  <p className="text-gray-500 text-sm">
+                                    Загрузка отзывов...
+                                  </p>
+                                ) : (
+                                  <ReviewForm
+                                    productId={item.product_id}
+                                    onReviewAdded={() =>
+                                      window.location.reload()
+                                    }
+                                    existingReview={existingReview}
+                                  />
+                                )}
+                              </div>
+                            </li>
+                          );
+                        })}
                       </ul>
                       <p className="text-right text-xl font-bold text-[#006933] mt-4">
                         Итого: {total.toLocaleString()} ₽

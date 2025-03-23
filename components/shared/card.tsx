@@ -4,9 +4,10 @@ import { Images, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { CardReview } from "./cardReview";
 
 interface Product {
-  _id?: string;
+  _id: string;
   category: { name: string };
   slug: string;
   name: string;
@@ -141,7 +142,7 @@ export function Card({ product }: CardProps) {
               fill={isOutOfStock ? "#d1d5db" : "#ff9d00"}
               size={16}
             />
-            <span className="text-sm text-gray-600">4.4</span>
+            <CardReview product={product} />
           </div>
         </div>
       </div>

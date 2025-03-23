@@ -16,16 +16,72 @@ import {
   AnimatedTeamMember,
 } from "@/components/AnimatedSection";
 import { HelpCircle } from "lucide-react";
+import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "О нас | QuixMade",
+  title: "О нас | QuixMade — команда, миссия и ценности",
   description:
-    "Узнайте больше о QuixMade — нашей команде, миссии и ценностях. Мы делимся новостями и обзорами технологий для вас!",
+    "Узнайте больше о команде QuixMade, нашей миссии и ценностях. Мы делимся новостями и обзорами технологий для вас!",
+  keywords: [
+    "о нас",
+    "команда QuixMade",
+    "миссия QuixMade",
+    "ценности QuixMade",
+    "технологии",
+    "обзоры гаджетов",
+  ],
+  openGraph: {
+    title: "О нас | QuixMade — команда, миссия и ценности",
+    description:
+      "Узнайте больше о команде QuixMade, нашей миссии и ценностях. Мы делимся новостями и обзорами технологий для вас!",
+    url: "https://www.quixmade.ru/about",
+    siteName: "QuixMade",
+    images: [
+      {
+        url: "https://made.quixoria.ru/logo_min.jpg",
+        width: 1200,
+        height: 630,
+        alt: "О нас | QuixMade",
+      },
+    ],
+    locale: "ru_RU",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "О нас | QuixMade — команда, миссия и ценности",
+    description:
+      "Узнайте больше о команде QuixMade, нашей миссии и ценностях. Мы делимся новостями и обзорами технологий для вас!",
+    images: ["https://made.quixoria.ru/logo_min.jpg"],
+  },
 };
 
 export default function AboutPage() {
   return (
     <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen gap-6 bg-gray-50">
+      <Script
+        id="about-page-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "AboutPage",
+            name: "О нас | QuixMade",
+            description:
+              "Узнайте больше о команде QuixMade, нашей миссии и ценностях. Мы делимся новостями и обзорами технологий для вас!",
+            url: "https://www.quixmade.ru/about",
+            image: "https://made.quixoria.ru/about-og.jpg",
+            publisher: {
+              "@type": "Organization",
+              name: "QuixMade",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://made.quixoria.ru/logo.svg",
+              },
+            },
+          }),
+        }}
+      />
       <Header />
       <Container className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <AnimatedDiv>

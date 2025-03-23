@@ -68,6 +68,7 @@ export async function POST() {
       cart_id: cart._id, // Связываем заказ с корзиной
       user_id: new ObjectId(userId), // ID пользователя
       createdAt: new Date(), // Дата создания заказа
+      status: "assembly", // Дата создания заказа
     };
 
     // Добавляем заказ в коллекцию orders

@@ -66,9 +66,7 @@ export const NewsEditor: React.FC<NewsEditorProps> = ({
 
       onChange(blocks);
     },
-    onCreate: () => {
-      console.log("Редактор инициализирован");
-    },
+    onCreate: () => {},
   });
 
   // Функция для загрузки изображения через API

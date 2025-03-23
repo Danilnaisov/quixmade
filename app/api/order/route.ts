@@ -37,6 +37,7 @@ export async function GET() {
         return {
           _id: order._id.toString(),
           cart_id: order.cart_id.toString(),
+          user_id: order.user_id.toString(),
           createdAt: order.createdAt.toISOString(), // Преобразуем дату в строку
           items:
             cart?.items.map((item) => ({

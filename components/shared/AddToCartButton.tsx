@@ -13,7 +13,6 @@ export const AddToCartButton: React.FC<Props> = ({ productId }) => {
   const [inCart, setInCart] = useState<boolean | null>(null);
   const [quantity, setQuantity] = useState<number | null>(null);
 
-  // Проверка наличия товара в корзине
   useEffect(() => {
     const checkIfInCart = async () => {
       try {
@@ -29,7 +28,7 @@ export const AddToCartButton: React.FC<Props> = ({ productId }) => {
 
         const data = await response.json();
         setInCart(data.inCart);
-        setQuantity(data.quantity); // Устанавливаем количество товара
+        setQuantity(data.quantity);
       } catch (error) {
         console.error("Ошибка при проверке корзины:", error);
       }
@@ -38,7 +37,6 @@ export const AddToCartButton: React.FC<Props> = ({ productId }) => {
     checkIfInCart();
   }, [productId]);
 
-  // Добавление товара в корзину
   const handleAddToCart = async () => {
     try {
       const response = await fetch("/api/cart", {
@@ -54,7 +52,6 @@ export const AddToCartButton: React.FC<Props> = ({ productId }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        // alert(errorData.error || "Ошибка при добавлении товара в корзину");
         toast(errorData.error || "Ошибка при добавлении товара в корзину");
         return;
       }
@@ -64,12 +61,10 @@ export const AddToCartButton: React.FC<Props> = ({ productId }) => {
       setQuantity(1);
     } catch (error) {
       console.error("Ошибка при добавлении товара в корзину:", error);
-      // alert("Произошла ошибка при добавлении товара в корзину");
       toast("Произошла ошибка при добавлении товара в корзину");
     }
   };
 
-  // Изменение количества товара
   const updateQuantity = async (newQuantity: number) => {
     try {
       const response = await fetch("/api/cart", {
@@ -86,19 +81,16 @@ export const AddToCartButton: React.FC<Props> = ({ productId }) => {
       if (!response.ok) {
         const errorData = await response.json();
         toast(errorData.error || "Ошибка при обновлении количества товара");
-        // alert(errorData.error || "Ошибка при обновлении количества товара");
         return;
       }
 
       setQuantity(newQuantity);
     } catch (error) {
       console.error("Ошибка при обновлении количества товара:", error);
-      // alert("Произошла ошибка при обновлении количества товара");
       toast("Произошла ошибка при обновлении количества товара");
     }
   };
 
-  // Удаление товара из корзины
   const handleRemoveFromCart = async () => {
     try {
       const response = await fetch("/api/cart", {
@@ -113,18 +105,16 @@ export const AddToCartButton: React.FC<Props> = ({ productId }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        // alert(errorData.error || "Ошибка при удалении товара из корзины");
         toast(errorData.error || "Ошибка при удалении товара из корзины");
         return;
       }
 
       toast("Товар успешно удален из корзины!");
 
-      setInCart(false); // Обновляем состояние кнопки
-      setQuantity(0); // Сбрасываем количество
+      setInCart(false);
+      setQuantity(0);
     } catch (error) {
       console.error("Ошибка при удалении товара из корзины:", error);
-      // alert("Произошла ошибка при удалении товара из корзины");
       toast("Произошла ошибка при удалении товара из корзины");
     }
   };

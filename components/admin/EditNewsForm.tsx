@@ -78,8 +78,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
     try {
       let response;
 
-      console.log("Отправляемые данные:", formData);
-
       if (formData._id) {
         const { _id, ...newsData } = formData;
         response = await fetch(`/api/news?slug=${formData.slug}`, {
@@ -100,7 +98,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
         });
 
         const responseData = await response.json();
-        console.log("Ответ от сервера:", responseData);
         if (responseData.id) {
           setFormData((prev) => ({ ...prev, _id: responseData.id }));
         }
@@ -112,7 +109,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({
       }
 
       const savedData = await response.json();
-      console.log("Сохраненные данные:", savedData);
 
       onSave({ ...formData, ...savedData });
     } catch (error) {

@@ -1,8 +1,8 @@
-import { writeFileSync } from 'fs';
-import { resolve } from 'path';
-import axios from 'axios'; // Для запросов к API
+import { writeFileSync } from "fs";
+import { resolve } from "path";
+import axios from "axios";
 
-const SITE_URL = 'https://made.quixoria.ru';
+const SITE_URL = "https://made.quixoria.ru";
 
 // Функция для получения динамических путей новостей
 async function fetchNewsPaths() {
@@ -12,16 +12,13 @@ async function fetchNewsPaths() {
 
 async function fetchProductPaths() {
   const response = await axios.get(`${SITE_URL}/api/products`);
-  return response.data.map((product) => `/catalog/${product.category.name}/${product.slug}`);
+  return response.data.map(
+    (product) => `/catalog/${product.category.name}/${product.slug}`
+  );
 }
 
 async function generateSitemap() {
-  const staticPaths = [
-    '/',
-    '/about',
-    '/user',
-    '/cart',
-  ];
+  const staticPaths = ["/", "/about", "/user", "/cart"];
 
   const newsPaths = await fetchNewsPaths();
   const productPaths = await fetchProductPaths();
@@ -41,11 +38,11 @@ async function generateSitemap() {
         </url>
       `
         )
-        .join('')}
+        .join("")}
     </urlset>
   `;
 
-  const filePath = resolve('./public/sitemap.xml');
+  const filePath = resolve("./public/sitemap.xml");
   writeFileSync(filePath, sitemap);
   console.log(`Sitemap generated at ${filePath}`);
 }

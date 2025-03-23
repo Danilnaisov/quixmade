@@ -41,7 +41,7 @@ export const EditBannerForm: React.FC<EditBannerFormProps> = ({
   const handleImageUploadSuccess = (filePaths: string[]) => {
     setFormData((prevData) => ({
       ...prevData,
-      image: filePaths[0], // Баннеры используют только одно изображение
+      image: filePaths[0],
     }));
   };
 
@@ -69,20 +69,16 @@ export const EditBannerForm: React.FC<EditBannerFormProps> = ({
         });
       }
 
-      // Читаем тело ответа только один раз
       const responseData = await response.json();
 
-      // Проверяем успешность запроса
       if (!response.ok) {
         throw new Error(responseData.error || "Ошибка при сохранении баннера");
       }
 
-      // Если это POST-запрос (новый баннер), обновляем _id
       if (!formData._id && responseData.id) {
         setFormData((prev) => ({ ...prev, _id: responseData.id }));
       }
 
-      // Вызываем onSave с обновлёнными данными
       onSave({ ...formData, ...responseData });
     } catch (error) {
       console.error("Ошибка при сохранении баннера:", error);

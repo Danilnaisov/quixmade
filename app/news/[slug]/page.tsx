@@ -18,7 +18,6 @@ import { ShareButton } from "@/components/shared/ShareButton";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 
-// Настраиваем DOMPurify для работы на сервере
 const { window } = new JSDOM("<!DOCTYPE html>");
 const purify = DOMPurify(window);
 
@@ -31,8 +30,37 @@ export async function generateMetadata({
   const product = await getNewsBySlug(slug);
 
   return {
-    title: product ? `${product.short_name}` : "QuixMade: Новость не найдена",
-    description: product?.short_desc || "Описание Новости",
+    title: product
+      ? `${product.short_name} | QuixMade`
+      : "QuixMade: Новость не найдена",
+    description: product?.short_desc || "Читайте подробности на QuixMade.",
+    keywords: product?.tags || [],
+    openGraph: {
+      title: product
+        ? `${product.short_name} | QuixMade`
+        : "QuixMade: Новость не найдена",
+      description: product?.short_desc || "Читайте подробности на QuixMade.",
+      url: `https://www.quixmade.ru/news/${slug}`,
+      siteName: "QuixMade",
+      images: [
+        {
+          url: product?.image || "https://made.quixoria.ru/logo_min.jpg",
+          width: 1200,
+          height: 630,
+          alt: product?.short_name || "Новость | QuixMade",
+        },
+      ],
+      locale: "ru_RU",
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product
+        ? `${product.short_name} | QuixMade`
+        : "QuixMade: Новость не найдена",
+      description: product?.short_desc || "Читайте подробности на QuixMade.",
+      images: [product?.image || "https://made.quixoria.ru/logo_min.jpg"],
+    },
   };
 }
 
@@ -145,7 +173,6 @@ export default async function ProductPage({
           <div className="flex flex-col gap-6 mb-4 sm:mb-6">
             {product.content.map((block, index) => {
               if (block.type === "text") {
-                // Нормализуем HTML, убирая лишние пробелы и переносы строк
                 const normalizedHtml = block.value.replace(/\s+/g, " ").trim();
                 const sanitizedHtml = purify.sanitize(normalizedHtml);
                 return (

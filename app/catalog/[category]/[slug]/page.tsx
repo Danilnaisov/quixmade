@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Metadata } from "next";
 import { getProductBySlug } from "@/app/api/api_utils";
 import {
@@ -19,6 +21,58 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { ShareButton } from "@/components/shared/ShareButton";
+import Script from "next/script";
+import { Star } from "lucide-react";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { ClientReviewSection } from "@/components/shared/ClientReviewSection";
+import { cookies } from "next/headers";
+
+async function getReviews(productId: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/reviews?productId=${productId}`,
+    { cache: "no-store" }
+  );
+  if (!res.ok) {
+    return [];
+  }
+  return res.json();
+}
+
+async function checkPurchase(userId: string, productId: string) {
+  try {
+    const cookieStore = cookies();
+    const cookieHeader = (await cookieStore)
+      .getAll()
+      .map((cookie) => `${cookie.name}=${cookie.value}`)
+      .join("; ");
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order`, {
+      headers: {
+        "x-user-id": userId,
+        Cookie: cookieHeader,
+      },
+    });
+
+    if (!res.ok) {
+      console.error("Failed to fetch orders:", res.status, res.statusText);
+      return false;
+    }
+
+    const orders = await res.json();
+    const hasPurchased = orders.some((order: any) =>
+      order.items.some((item: any) => {
+        const itemProductId = item.product_id.toString();
+        const targetProductId = productId.toString();
+        return itemProductId === targetProductId;
+      })
+    );
+    return hasPurchased;
+  } catch (error) {
+    console.error("Error checking purchase:", error);
+    return false;
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -29,8 +83,46 @@ export async function generateMetadata({
   const product = await getProductBySlug(slug);
 
   return {
-    title: product ? `${product.name}` : "QuixMade: Товар не найден",
-    description: product?.short_description || "Описание товара",
+    title: product
+      ? `${product.name} | QuixMade`
+      : "Товар не найден | QuixMade",
+    description:
+      product?.short_description || "Подробное описание товара на QuixMade.",
+    keywords: [
+      product?.name || "товар",
+      "купить",
+      "QuixMade",
+      "электроника",
+      "гаджеты",
+    ],
+    openGraph: {
+      title: product
+        ? `${product.name} | QuixMade`
+        : "Товар не найден | QuixMade",
+      description:
+        product?.short_description || "Подробное описание товара на QuixMade.",
+      url: `https://www.quixmade.ru/catalog/${product?.category.name}/${slug}`,
+      siteName: "QuixMade",
+      images: [
+        {
+          url: product?.image || "https://made.quixoria.ru/logo_min.jpg",
+          width: 1200,
+          height: 630,
+          alt: product?.name || "Товар | QuixMade",
+        },
+      ],
+      locale: "ru_RU",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product
+        ? `${product.name} | QuixMade`
+        : "Товар не найден | QuixMade",
+      description:
+        product?.short_description || "Подробное описание товара на QuixMade.",
+      images: [product?.image || "https://made.quixoria.ru/logo_min.jpg"],
+    },
   };
 }
 
@@ -50,8 +142,53 @@ export default async function ProductPage({
     );
   }
 
+  const reviews = await getReviews(product.id.toString());
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  const hasPurchased = userId
+    ? await checkPurchase(userId, product.id.toString())
+    : false;
+
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum: number, review: any) => sum + review.stars, 0) /
+        reviews.length
+      : 0;
+
   return (
     <div className="font-[family-name:var(--font-Montserrat)] flex flex-col min-h-screen gap-6 bg-gray-50">
+      <Script
+        id="product-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            description: product.short_description,
+            image: product.image,
+            sku: product.sku || product.id,
+            offers: {
+              "@type": "Offer",
+              price: product.price,
+              priceCurrency: "RUB",
+              availability:
+                product.stock_quantity > 0
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
+              url: `https://www.quixmade.ru/catalog/${product.category.name}/${slug}`,
+            },
+            aggregateRating:
+              reviews.length > 0
+                ? {
+                    "@type": "AggregateRating",
+                    ratingValue: averageRating.toFixed(1),
+                    reviewCount: reviews.length,
+                  }
+                : undefined,
+          }),
+        }}
+      />
       <Header />
       <Container className="mt-4 w-full flex flex-col gap-4 items-center">
         <div className="flex flex-col gap-3 w-full max-w-6xl">
@@ -112,6 +249,17 @@ export default async function ProductPage({
                   size="lg"
                   className="font-extrabold text-gray-900 text-xl sm:text-2xl lg:text-3xl"
                 />
+                {averageRating > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Star size={20} fill="#ff9d00" color="#ff9d00" />
+                    <span className="text-lg font-semibold">
+                      {averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      ({reviews.length})
+                    </span>
+                  </div>
+                )}
               </div>
               <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
                 {product.short_description}
@@ -174,7 +322,7 @@ export default async function ProductPage({
           text="Описание"
           className="text-2xl sm:text-3xl font-bold mb-4"
         />
-        {product.description.split("\n").map((line, index) => (
+        {product.description.split("\n").map((line: string, index: number) => (
           <p
             key={index}
             className="text-gray-700 text-sm sm:text-base leading-relaxed"
@@ -193,7 +341,7 @@ export default async function ProductPage({
               <table className="w-full">
                 <tbody>
                   {Object.entries(product.features).map(
-                    ([key, value], index) => {
+                    ([key, value]: [string, any], index: number) => {
                       const displayKey =
                         key === "wireless" ? "Беспроводная" : key;
                       const displayValue =
@@ -217,10 +365,12 @@ export default async function ProductPage({
           </div>
         )}
       </Container>
-      <Container className="bg-[#F9F8F8] rounded-3xl p-6 sm:p-8 w-full max-w-6xl mb-6">
-        <Title text="Отзывы" className="text-2xl sm:text-3xl font-bold mb-4" />
-        <p className="text-gray-500 text-sm sm:text-base">Пока нет отзывов.</p>
-      </Container>
+      <ClientReviewSection
+        productId={product.id.toString()}
+        reviews={reviews}
+        hasPurchased={hasPurchased}
+        userId={userId}
+      />
       <Footer />
     </div>
   );

@@ -7,23 +7,63 @@ import Link from "next/link";
 export async function generateMetadata({
   params,
 }: {
-  params: { category: string };
+  params: Promise<{ category: string }>; // params теперь Promise
 }): Promise<Metadata> {
-  const cat = await getCategoryByName(params.category);
+  const { category } = await params; // Дожидаемся params
+  const cat = await getCategoryByName(category);
   return {
-    title: cat ? `${cat.name_ru}` : "Категория не найдена",
-    description: cat?.description || "Категория не найдена",
+    title: cat
+      ? `${cat.name_ru} | QuixMade`
+      : "Категория не найдена | QuixMade",
+    description:
+      cat?.description || "Исследуйте товары в этой категории на QuixMade.",
+    keywords: [
+      cat?.name_ru || "категория",
+      "товары",
+      "купить",
+      "QuixMade",
+      "электроника",
+      "гаджеты",
+    ],
+    openGraph: {
+      title: cat
+        ? `${cat.name_ru} | QuixMade`
+        : "Категория не найдена | QuixMade",
+      description:
+        cat?.description || "Исследуйте товары в этой категории на QuixMade.",
+      url: `https://www.quixmade.ru/catalog/${category}`, // Используем category после await
+      siteName: "QuixMade",
+      images: [
+        {
+          url: "https://made.quixoria.ru/logo_min.jpg",
+          width: 1200,
+          height: 630,
+          alt: cat?.name_ru || "Категория | QuixMade",
+        },
+      ],
+      locale: "ru_RU",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: cat
+        ? `${cat.name_ru} | QuixMade`
+        : "Категория не найдена | QuixMade",
+      description:
+        cat?.description || "Исследуйте товары в этой категории на QuixMade.",
+      images: ["https://made.quixoria.ru/logo_min.jpg"],
+    },
   };
 }
 
-// Основной компонент страницы
 export default async function CategoryPage({
   params,
 }: {
-  params: { category: string };
+  params: Promise<{ category: string }>; // params теперь Promise
 }) {
-  const cat = await getCategoryByName(params.category);
-  const products = await getProductsByCategory(params.category);
+  const { category } = await params; // Дожидаемся params
+  const cat = await getCategoryByName(category);
+  const products = await getProductsByCategory(category);
 
   if (!cat) {
     return (
