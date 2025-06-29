@@ -108,7 +108,7 @@ export async function PUT(request: NextRequest) {
     const updateData: any = {};
     if (short_name) updateData.short_name = short_name;
     if (short_desc) updateData.short_desc = short_desc;
-    if (content) updateData.content = content; // Используем content вместо desc
+    if (content) updateData.content = content;
     if (image) updateData.image = image;
     if (date) updateData.date = new Date(date);
     if (tags) updateData.tags = tags;

@@ -12,7 +12,6 @@ if (!uri) {
 }
 
 if (process.env.NODE_ENV === "development") {
-  // В режиме разработки используем глобальный объект для кэширования клиента
   if (!(global as any)._mongoClientPromise) {
     client = new MongoClient(uri, options);
     (global as any)._mongoClientPromise = client.connect();

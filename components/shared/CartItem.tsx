@@ -60,6 +60,7 @@ export const CartItem: React.FC<CartItemProps> = ({
             <Image
               src={item.image}
               alt={item.name}
+              title={item.name}
               width={1000}
               height={1000}
               className="w-24 h-24 object-cover"

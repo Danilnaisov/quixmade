@@ -49,7 +49,7 @@ export function CardReview({ product }: CardReviewProps) {
     if (product.id) {
       fetchReviews();
     } else {
-      console.warn("product.id is undefined or empty");
+      // console.warn("product.id is undefined or empty");
       setAverageRating(0);
     }
   }, [product.id]);

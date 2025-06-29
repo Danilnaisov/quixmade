@@ -132,6 +132,7 @@ export const Banner: React.FC<Props> = ({ className }) => {
                       <Image
                         src={banner.image}
                         alt="Banner"
+                        title="Реклама"
                         width={1420}
                         height={480}
                         className="w-full h-full object-cover"

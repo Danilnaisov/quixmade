@@ -4,7 +4,9 @@ Allow: /
 
 Disallow: /admin
 Disallow: /api
-
+Disallow: /cart
+Disallow: /user
+Disallow: /order
 Disallow: /index$
 
 Disallow: *&

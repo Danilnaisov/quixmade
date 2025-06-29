@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable jsx-a11y/alt-text */
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -18,9 +20,19 @@ import {
   Package,
   Newspaper,
   Image,
+  Search,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Category {
   _id: string;
@@ -67,7 +79,7 @@ interface Banner {
 interface User {
   _id: string;
   email: string;
-  name?: string;
+  login?: string; // Заменяем name на login
   role: string;
 }
 
@@ -79,6 +91,8 @@ const AdminPage = () => {
   const [news, setNews] = useState<News[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchEmail, setSearchEmail] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingNews, setEditingNews] = useState<News | null>(null);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
@@ -145,7 +159,6 @@ const AdminPage = () => {
     fetch("/api/banners")
       .then((res) => res.json())
       .then((data) => {
-        // Сортировка: advertising в первую очередь
         const sortedBanners = data.sort((a: Banner, b: Banner) => {
           if (a.status === "advertising" && b.status !== "advertising")
             return -1;
@@ -163,12 +176,64 @@ const AdminPage = () => {
     // Загрузка списка пользователей
     fetch("/api/users")
       .then((res) => res.json())
-      .then((data) => setUsers(data))
+      .then((data) => {
+        setUsers(data);
+        setFilteredUsers(data);
+      })
       .catch((error) => {
         console.error("Ошибка загрузки пользователей:", error);
         toast.error("Не удалось загрузить пользователей", { duration: 3000 });
       });
   }, [status, session, router]);
+
+  // Фильтрация пользователей по email
+  useEffect(() => {
+    if (searchEmail.trim() === "") {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter((user) =>
+        user.email.toLowerCase().includes(searchEmail.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
+  }, [searchEmail, users]);
+
+  // Обновление роли пользователя
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    try {
+      const response = await fetch("/api/users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, role: newRole }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Ошибка при обновлении роли");
+      }
+
+      // Обновляем локальное состояние
+      setUsers((prev) =>
+        prev.map((user) =>
+          user._id === userId ? { ...user, role: newRole } : user
+        )
+      );
+      setFilteredUsers((prev) =>
+        prev.map((user) =>
+          user._id === userId ? { ...user, role: newRole } : user
+        )
+      );
+
+      toast.success("Роль пользователя обновлена", { duration: 2000 });
+    } catch (error: any) {
+      console.error("Ошибка при обновлении роли:", error);
+      toast.error(error.message || "Не удалось обновить роль", {
+        duration: 3000,
+      });
+    }
+  };
 
   if (status === "loading") {
     return (
@@ -520,24 +585,60 @@ const AdminPage = () => {
             </div>
           </Collapsible.Trigger>
           <Collapsible.Content className="bg-white p-6 rounded-b-xl shadow-md">
-            <ul className="flex flex-col gap-4">
-              {users.map((user) => (
-                <li
-                  key={user._id}
-                  className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {user.name || "Без имени"}
-                    </p>
-                    <p className="text-sm text-gray-600">{user.email}</p>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    Роль: {user.role === "admin" ? "Админ" : "Пользователь"}
-                  </p>
-                </li>
-              ))}
-            </ul>
+            {/* Поле поиска по email */}
+            <div className="mb-4 flex items-center gap-2">
+              <Input
+                type="text"
+                placeholder="Поиск по email..."
+                value={searchEmail}
+                onChange={(e) => setSearchEmail(e.target.value)}
+                className="w-full max-w-md"
+              />
+              <Search size={20} className="text-gray-500" />
+            </div>
+
+            {filteredUsers.length > 0 ? (
+              <ul className="flex flex-col gap-4">
+                {filteredUsers.map((user) => (
+                  <li
+                    key={user._id}
+                    className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <User size={24} className="text-gray-600" />
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {user.login || "Без логина"}
+                        </p>
+                        <p className="text-sm text-gray-600">{user.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={user.role}
+                        onValueChange={(newRole) =>
+                          handleRoleChange(user._id, newRole)
+                        }
+                      >
+                        <SelectTrigger className="w-[150px]">
+                          <SelectValue placeholder="Выберите роль" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">Админ</SelectItem>
+                          <SelectItem value="user">Пользователь</SelectItem>
+                          <SelectItem value="assembler">Сборщик</SelectItem>
+                          <SelectItem value="delivery">Доставщик</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 text-sm sm:text-base">
+                Пользователи не найдены.
+              </p>
+            )}
           </Collapsible.Content>
         </Collapsible.Root>
       </Container>

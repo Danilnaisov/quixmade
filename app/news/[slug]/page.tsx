@@ -142,7 +142,7 @@ export default async function ProductPage({
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
             <Title
               text={product.short_name}
-              size="lg"
+              size="xl"
               className="font-extrabold text-gray-900 leading-tight text-xl sm:text-2xl lg:text-3xl"
             />
             <ShareButton slug={slug} type="news" />
@@ -151,6 +151,7 @@ export default async function ProductPage({
             <Image
               src={product.image}
               alt={product.short_name}
+              title={product.short_name}
               fill
               className="object-cover transition-transform duration-500 hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 768px"
@@ -192,6 +193,7 @@ export default async function ProductPage({
                     <Image
                       src={block.value}
                       alt={block.alt || "Изображение в новости"}
+                      title={block.alt || "Изображение в новости"}
                       fill
                       className="object-contain"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 768px"

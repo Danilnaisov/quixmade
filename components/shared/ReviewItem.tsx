@@ -86,6 +86,7 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
                   <Image
                     src={image}
                     alt={`Review image ${index + 1}`}
+                    title={`Review image ${index + 1}`}
                     fill
                     className="object-cover rounded-md"
                   />

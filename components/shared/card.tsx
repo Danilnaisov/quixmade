@@ -56,6 +56,7 @@ export function Card({ product }: CardProps) {
             <Image
               src={images[0]}
               alt={name}
+              title={name}
               fill
               className={cn(
                 "rounded-[10px] object-cover",

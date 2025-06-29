@@ -111,7 +111,7 @@ export default function AboutPage() {
             transition={{ duration: 0.5 }}
           >
             <Title
-              text="О нас"
+              text="QuixMade — команда, которая знает всё о технологиях!"
               size="lg"
               className="font-extrabold text-gray-900 leading-tight text-xl sm:text-2xl lg:text-3xl mb-6"
             />
@@ -154,6 +154,7 @@ export default function AboutPage() {
                   <Image
                     src="/dan.jpg"
                     alt="Четин Данил"
+                    title="Четин Данил"
                     fill
                     className="object-cover "
                   />
@@ -182,6 +183,7 @@ export default function AboutPage() {
                   <Image
                     src="/egor.jpg"
                     alt="Власов Егор"
+                    title="Власов Егор"
                     fill
                     className="object-cover "
                   />
@@ -211,6 +213,7 @@ export default function AboutPage() {
                   <Image
                     src="/ars.jpg"
                     alt="Шимов Арсений"
+                    title="Шимов Арсений"
                     fill
                     className="object-cover"
                   />
@@ -235,6 +238,57 @@ export default function AboutPage() {
                 </p>
               </AnimatedTeamMember>
             </div>
+          </AnimatedSection>
+
+          <AnimatedSection className="mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+              Наш офис и рабочий процесс
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="relative h-[520px] rounded-xl overflow-hidden">
+                <Image
+                  src="/office-interior.png"
+                  alt="Интерьер офиса QuixMade"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="relative h-[520px] rounded-xl overflow-hidden">
+                <Image
+                  src="/team-meeting.jpg"
+                  alt="Команда QuixMade на встрече"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </div>
+            <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
+              Наш офис расположен в Москве и оснащён всем необходимым для
+              комфортной работы. Мы ценим современный дизайн и удобство, поэтому
+              у нас есть зоны для обсуждений, тестирования гаджетов и отдыха.
+              Каждый день мы анализируем новые устройства, пишем обзоры и
+              делимся впечатлениями с вами!
+            </p>
+          </AnimatedSection>
+
+          <AnimatedSection className="mb-8">
+            <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
+              Читайте наши обзоры:
+              <Link
+                href="/news/razer-blackwidow-v4-mini-release"
+                className="text-blue-600 hover:underline ml-1"
+              >
+                Razer BlackWidow V4 Mini
+              </Link>
+              ,
+              <Link
+                href="/news/keychron-k3-magnetic-switches-release"
+                className="text-blue-600 hover:underline ml-1"
+              >
+                Keychron K3
+              </Link>
+              и другие новинки!
+            </p>
           </AnimatedSection>
 
           {/* Наши ценности */}

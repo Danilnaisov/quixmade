@@ -40,6 +40,7 @@ export const NewsCard = ({
           <Image
             src={imageUrl}
             alt={title}
+            title={title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -51,8 +52,8 @@ export const NewsCard = ({
         <div className="p-5">
           <Title
             text={title}
-            size="sm"
-            className="font-bold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors duration-200"
+            size="lg"
+            className="font-bold text-gray-900 text-xl mb-2 line-clamp-2 hover:text-blue-600 transition-colors duration-200"
           />
           <p className="text-gray-700 text-sm line-clamp-2 mb-3 leading-relaxed">
             {description}

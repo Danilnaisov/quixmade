@@ -246,7 +246,7 @@ export default async function ProductPage({
               <div className="flex justify-between items-center">
                 <Title
                   text={product.name}
-                  size="lg"
+                  size="xl"
                   className="font-extrabold text-gray-900 text-xl sm:text-2xl lg:text-3xl"
                 />
                 {averageRating > 0 && (
@@ -320,6 +320,7 @@ export default async function ProductPage({
       <Container className="bg-[#F9F8F8] rounded-3xl p-6 sm:p-8 w-full max-w-6xl">
         <Title
           text="Описание"
+          size="md"
           className="text-2xl sm:text-3xl font-bold mb-4"
         />
         {product.description.split("\n").map((line: string, index: number) => (
@@ -335,6 +336,7 @@ export default async function ProductPage({
           <div className="mt-6">
             <Title
               text="Характеристики"
+              size="md"
               className="text-2xl sm:text-3xl font-bold mb-4"
             />
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">

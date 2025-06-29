@@ -94,7 +94,14 @@ export const Header: React.FC<Props> = ({ className }) => {
       <Container className="flex items-center justify-between py-4 mx-auto">
         {/* Логотип */}
         <Link href="/" className="logo">
-          <Image src="/logo.svg" alt="logo" width={170} height={49} priority />
+          <Image
+            src="/logo.svg"
+            alt="logo"
+            title={"QuixMade"}
+            width={170}
+            height={49}
+            priority
+          />
         </Link>
         <Link href="/" className="logo_min">
           <Image

@@ -42,6 +42,7 @@ export const ProductPhotos: React.FC<Props> = async ({ slug }) => {
                   <Image
                     src={image}
                     alt={`Product image ${index + 1}`}
+                    title={`Product image ${index + 1}`}
                     width={1000}
                     height={1000}
                     className="object-contain w-full h-full"

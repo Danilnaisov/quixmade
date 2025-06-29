@@ -46,8 +46,6 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     }
   }, [existingReview]);
 
-  console.log("existingReview in ReviewForm:", existingReview);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewText || rating === 0) {

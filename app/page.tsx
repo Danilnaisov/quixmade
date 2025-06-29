@@ -1,7 +1,7 @@
 import { Banner, CardList, Footer, Header } from "@/components/shared";
-import YandexMetrika from "@/components/YandexMetrika";
 import type { Metadata } from "next";
 import Script from "next/script";
+import YandexMetrika from "@/components/YandexMetrika";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {

@@ -127,10 +127,10 @@ export const CardList: React.FC<Props> = ({
   return (
     <Container className="flex flex-col p-5 gap-4 bg-white rounded-[20px] mt-6 shadow-md">
       {text && (
-        <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-2">
+        <h2 className="text-3xl font-extrabold text-gray-900 flex items-center gap-2">
           {text}
           {type === "hot"}
-        </h1>
+        </h2>
       )}
       {renderCards()}
     </Container>

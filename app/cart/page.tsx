@@ -19,8 +19,8 @@ interface CartItemData {
   quantity: number;
   stock_quantity: number;
   savings: number;
-  image: string; // Заменяем images на image
-  link: string; // Добавляем link
+  image: string;
+  link: string;
 }
 
 interface CartData {

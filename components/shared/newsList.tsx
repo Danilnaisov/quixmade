@@ -27,7 +27,6 @@ export const NewsList = () => {
         setIsLoading(false);
       }
     };
-
     fetchNews();
   }, []);
 

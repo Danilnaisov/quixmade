@@ -92,8 +92,15 @@ export const LoginPage: React.FC<Props> = ({ className }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Ошибка при регистрации");
-        toast.error(data.error || "Ошибка при регистрации", { duration: 3000 });
+        if (response.status === 429) {
+          setError(data.error);
+          toast.error(data.error, { duration: 5000 });
+        } else {
+          setError(data.error || "Ошибка при регистрации");
+          toast.error(data.error || "Ошибка при регистрации", {
+            duration: 3000,
+          });
+        }
       } else {
         toast.success("Регистрация успешна! Выполняется вход...", {
           duration: 2000,

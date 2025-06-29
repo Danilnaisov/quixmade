@@ -10,17 +10,17 @@ import { useSession } from "next-auth/react";
 const ClientReviewSection = ({
   productId,
   reviews,
-  hasPurchased,
   userId,
 }: {
   productId: string;
   reviews: any[];
-  hasPurchased: boolean;
   userId?: string;
 }) => {
   const { data: session } = useSession();
   const [userReview, setUserReview] = useState<any>(null);
   const [sortedReviews, setSortedReviews] = useState<any[]>([]);
+  const [canLeaveReview, setCanLeaveReview] = useState(false);
+  const [loadingOrders, setLoadingOrders] = useState(true);
 
   useEffect(() => {
     // Находим отзыв текущего пользователя в списке reviews
@@ -33,6 +33,41 @@ const ClientReviewSection = ({
       setUserReview(foundReview || null);
     }
   }, [session, userId, reviews]);
+
+  useEffect(() => {
+    // Проверяем, может ли пользователь оставить отзыв
+    const checkCanLeaveReview = async () => {
+      if (!session?.user?.id && !userId) {
+        setCanLeaveReview(false);
+        setLoadingOrders(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/order`);
+        if (!res.ok) {
+          throw new Error("Ошибка при загрузке заказов");
+        }
+        const orders = await res.json();
+
+        const hasValidOrder = orders.some(
+          (order: any) =>
+            order.items.some((item: any) => item.product_id === productId) &&
+            order.status !== "canceled" &&
+            order.status == "delivered"
+        );
+
+        setCanLeaveReview(hasValidOrder);
+        setLoadingOrders(false);
+      } catch (error) {
+        console.error("Ошибка при проверке заказов:", error);
+        setCanLeaveReview(false);
+        setLoadingOrders(false);
+      }
+    };
+
+    checkCanLeaveReview();
+  }, [session, userId, productId]);
 
   useEffect(() => {
     // Сортируем отзывы: отзыв текущего пользователя (userReview) на первом месте
@@ -56,8 +91,14 @@ const ClientReviewSection = ({
   return (
     <Container className="bg-[#F9F8F8] rounded-3xl p-6 sm:p-8 w-full max-w-6xl mb-6">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
-        <Title text="Отзывы" className="text-2xl sm:text-3xl font-bold" />
-        {hasPurchased ? (
+        <Title
+          text="Отзывы"
+          size="md"
+          className="text-2xl sm:text-3xl font-bold"
+        />
+        {loadingOrders ? (
+          <p className="text-gray-500 text-sm">Проверка заказов...</p>
+        ) : canLeaveReview ? (
           <div>
             {userReview ? (
               <ReviewForm
@@ -78,7 +119,7 @@ const ClientReviewSection = ({
           </div>
         ) : (
           <p className="text-gray-500 text-sm">
-            Купите товар, чтобы оставить отзыв
+            Купите товар и дождитесь доставки, чтобы оставить отзыв
           </p>
         )}
       </div>

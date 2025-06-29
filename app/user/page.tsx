@@ -15,14 +15,22 @@ interface OrderItem {
   product_id: string;
   name: string;
   price: number;
+  fullPrice: number;
   quantity: number;
+  image: string;
+  link: string;
+  stock_quantity: number;
+  savings: number;
 }
 
 interface Order {
   _id: string;
   cart_id: string;
+  user_id: string;
   createdAt: string;
   items: OrderItem[];
+  total: number;
+  status: string;
 }
 
 const UserPage = () => {
@@ -103,6 +111,49 @@ const UserPage = () => {
     }
   };
 
+  const cancelOrder = async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/order`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ orderId, status: "canceled" }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Ошибка при отмене заказа");
+      }
+
+      // Обновляем список заказов после отмены
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === orderId ? { ...order, status: "canceled" } : order
+        )
+      );
+      toast.success("Заказ успешно отменён!", { duration: 2000 });
+    } catch (error) {
+      console.error("Ошибка при отмене заказа:", error);
+      toast.error("Не удалось отменить заказ", { duration: 2000 });
+    }
+  };
+
+  const getStatusTextAndColor = (status: string) => {
+    switch (status) {
+      case "assembly":
+        return { text: "В сборке", color: "text-yellow-600" };
+      case "delivery":
+      case "indelivery":
+        return { text: "В доставке", color: "text-teal-600" };
+      case "canceled":
+        return { text: "Отменён", color: "text-red-600" };
+      case "delivered":
+        return { text: "Получен", color: "text-green-600" };
+      default:
+        return { text: "Неизвестный статус", color: "text-gray-600" };
+    }
+  };
+
   if (status === "loading") {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -174,7 +225,6 @@ const UserPage = () => {
             )}
           </div>
         </div>
-
         <div className="flex flex-col gap-6">
           <Title
             text="Ваши заказы"
@@ -195,22 +245,29 @@ const UserPage = () => {
                     (sum, item) => sum + item.price * item.quantity,
                     0
                   );
+                  const { text: statusText, color: statusColor } =
+                    getStatusTextAndColor(order.status);
                   return (
                     <li
                       key={order._id}
                       className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
                     >
                       <div className="flex justify-between items-center mb-4">
-                        <p className="font-semibold text-gray-900">
-                          Заказ от{" "}
-                          {new Date(order.createdAt).toLocaleString("ru-RU", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            Заказ от{" "}
+                            {new Date(order.createdAt).toLocaleString("ru-RU", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                          <p className={`text-sm font-medium ${statusColor}`}>
+                            Статус: {statusText}
+                          </p>
+                        </div>
                         <div className="flex items-center gap-2">
                           <p className="text-sm text-gray-500">
                             ID: {shortenId(order._id)}
@@ -241,14 +298,16 @@ const UserPage = () => {
                               key={item.product_id}
                               className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2"
                             >
-                              <div>
-                                <p className="font-medium text-gray-800">
-                                  {item.name}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  {item.price.toLocaleString()} ₽ ×{" "}
-                                  {item.quantity}
-                                </p>
+                              <div className="flex items-center gap-4">
+                                <div>
+                                  <p className="font-medium text-gray-800">
+                                    {item.name}
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    {item.price.toLocaleString()} ₽ ×{" "}
+                                    {item.quantity}
+                                  </p>
+                                </div>
                               </div>
                               <div className="flex items-center gap-2">
                                 <p className="font-medium text-gray-900">
@@ -261,7 +320,7 @@ const UserPage = () => {
                                   <p className="text-gray-500 text-sm">
                                     Загрузка отзывов...
                                   </p>
-                                ) : (
+                                ) : order.status == "delivered" ? (
                                   <ReviewForm
                                     productId={item.product_id}
                                     onReviewAdded={() =>
@@ -269,15 +328,25 @@ const UserPage = () => {
                                     }
                                     existingReview={existingReview}
                                   />
-                                )}
+                                ) : null}
                               </div>
                             </li>
                           );
                         })}
                       </ul>
-                      <p className="text-right text-xl font-bold text-[#006933] mt-4">
-                        Итого: {total.toLocaleString()} ₽
-                      </p>
+                      <div className="flex justify-between items-center mt-4">
+                        <p className="text-xl font-bold text-[#006933]">
+                          Итого: {total.toLocaleString()} ₽
+                        </p>
+                        {order.status === "assembly" && (
+                          <Button
+                            variant="destructive"
+                            onClick={() => cancelOrder(order._id)}
+                          >
+                            Отменить заказ
+                          </Button>
+                        )}
+                      </div>
                     </li>
                   );
                 })}
