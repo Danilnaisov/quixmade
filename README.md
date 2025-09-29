@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Курсовая работа: Веб-приложение для электронной коммерции "QuixMade"
 
-## Getting Started
+Это проект, разработанный в рамках курсовой работы. Он представляет собой полнофункциональное веб-приложение для электронной коммерции, созданное с использованием современных веб-технологий.
 
-First, run the development server:
+## Обзор проекта
+
+**QuixMade** — это платформа для продажи товаров, включающая в себя каталог продукции, корзину покупок, систему аутентификации пользователей и панель администратора для управления контентом.
+
+## Ключевые технологии
+
+- **Фреймворк:** Next.js 15 (с App Router)
+- **Язык:** TypeScript
+- **Стилизация:** Tailwind CSS, Shadcn UI
+- **Фронтенд:** React 19
+- **Бэкенд:** Next.js API Routes, Express.js (для загрузки изображений)
+- **База данных:** MongoDB с Mongoose
+- **Аутентификация:** NextAuth.js
+
+## Настройка переменных окружения
+
+Перед запуском проекта необходимо настроить переменные окружения.
+
+1.  Создайте файл `.env` в корневой директории проекта.
+2.  Скопируйте содержимое файла `.env.example` в созданный `.env`:
+
+```
+MONGODB_URI=
+NEXTAUTH_SECRET=
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+3.  Заполните необходимые значения:
+    - `MONGODB_URI`: Ваша строка подключения к базе данных MongoDB.
+    - `NEXTAUTH_SECRET`: Секретный ключ для NextAuth.js. Вы можете сгенерировать его, например, с помощью команды `openssl rand -base64 32` в терминале.
+    - `NEXT_PUBLIC_API_URL`: URL вашего приложения. Для локальной разработки оставьте `http://localhost:3000`.
+
+## Установка и запуск
+
+### 1. Установка зависимостей:
+
+Откройте терминал в корневой папке проекта и выполните команду:
+
+```bash
+npm install
+```
+
+### 2. Запуск сервера для разработки:
+
+Приложение состоит из двух частей: основного сервера Next.js и сервера для загрузки изображений.
+
+**А. Запуск основного приложения (порт 3000):**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Откройте [http://localhost:3000](http://localhost:3000) в вашем браузере.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Б. Запуск сервера для загрузки изображений (порт 8050):**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+В отдельном окне терминала выполните:
 
-## Learn More
+```bash
+node server.js
+```
 
-To learn more about Next.js, take a look at the following resources:
+Этот сервер необходим для работы функционала загрузки изображений в панели администратора.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Сборка для продакшена:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Для создания оптимизированной производственной версии приложения выполните:
 
-## Deploy on Vercel
+```bash
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Запуск в продакшен-режиме:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Эта команда запускает приложение в режиме, приближенном к реальной эксплуатации.
+
+```bash
+npm run start
+```
